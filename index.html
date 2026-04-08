@@ -27,7 +27,7 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#0f1117;overflow:hidden;
 .acard .n{font-weight:600;color:#e8e8e8;font-size:.9em}
 .acard .i{color:#aaa;font-size:.78em;margin-top:2px}
 .acard .s{color:#666;font-size:.72em;margin-top:2px}
-.panel{width:340px;background:#1a1d27;border-left:1px solid #2d3040;padding:20px;overflow-y:auto;flex-shrink:0;display:none}
+.panel{width:360px;background:#1a1d27;border-left:1px solid #2d3040;padding:20px;overflow-y:auto;flex-shrink:0;display:none}
 .panel.on{display:block}
 .panel h2{font-size:.95em;color:#e8e8e8;margin-bottom:4px}
 .panel .pm{font-size:.78em;color:#888;margin-bottom:6px}
@@ -35,9 +35,15 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#0f1117;overflow:hidden;
 .panel a{color:#7c8cf8;text-decoration:none;font-size:.82em}
 .panel .sec{margin-top:10px;border-top:1px solid #2d3040;padding-top:10px}
 .panel .sec h4{font-size:.8em;color:#aaa;margin-bottom:6px}
+.panel .inst-row{font-size:.78em;color:#bbb;margin-top:6px;padding:6px 10px;background:rgba(124,140,248,.05);border-radius:6px;border:1px solid #2d3040}
+.panel .inst-row .lbl{color:#666;font-size:.7em;text-transform:uppercase;letter-spacing:.5px}
+.panel .inst-row .val{color:#e8e8e8;margin-top:2px}
+.panel .inst-row .sub{color:#777;font-size:.72em;margin-top:1px}
 .crow{font-size:.78em;color:#bbb;padding:4px 0;display:flex;justify-content:space-between;border-bottom:1px solid rgba(45,48,64,.4)}
 .crow:last-child{border-bottom:none}
 .crow .yr{color:#7c8cf8;font-weight:600;margin-left:8px;white-space:nowrap}
+.rbtn{display:inline-block;margin-top:8px;padding:6px 16px;background:rgba(124,140,248,.12);color:#7c8cf8;border:1px solid rgba(124,140,248,.3);border-radius:16px;cursor:pointer;font-size:.78em;font-weight:600;transition:.15s}
+.rbtn:hover{background:rgba(124,140,248,.25)}
 .legend{position:absolute;bottom:16px;left:16px;background:rgba(26,29,39,.95);border-radius:10px;padding:10px 14px;font-size:.72em;color:#999;border:1px solid #2d3040;display:none}
 .legend .r{display:flex;align-items:center;gap:6px;margin:3px 0}
 .legend .d{width:9px;height:9px;border-radius:50%;flex-shrink:0}
@@ -48,6 +54,11 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#0f1117;overflow:hidden;
 .spinner{width:32px;height:32px;border:3px solid #2d3040;border-top-color:#7c8cf8;border-radius:50%;animation:sp .6s linear infinite;margin:0 auto 10px}
 @keyframes sp{to{transform:rotate(360deg)}}
 .loader span{font-size:.82em;color:#888}
+.mini-spin{display:inline-block;width:12px;height:12px;border:2px solid #2d3040;border-top-color:#7c8cf8;border-radius:50%;animation:sp .6s linear infinite;vertical-align:middle;margin-right:6px}
+.hist-item{padding:4px 0;border-bottom:1px solid rgba(45,48,64,.3)}
+.hist-item:last-child{border-bottom:none}
+.hist-item a{color:#7c8cf8;font-size:.78em;cursor:pointer;text-decoration:none}
+.hist-item a:hover{text-decoration:underline}
 </style>
 </head>
 <body>
@@ -79,7 +90,9 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#0f1117;overflow:hidden;
 <h2 id="pName"></h2>
 <div class="pm" id="pMeta"></div>
 <div id="pBadge"></div>
-<a id="pLink" href="#" target="_blank">→ OpenAlex Profile</a>
+<div id="pInst" class="inst-row" style="display:none"><div class="lbl">Latest Institution (via OpenAlex)</div><div class="val" id="pInstName">—</div><div class="sub" id="pInstSub"></div></div>
+<div id="pActions" style="margin-top:10px"></div>
+<div class="sec" id="pHist" style="display:none"><h4>🕘 Search History</h4><div id="pHistList"></div></div>
 <div class="sec" id="pSec"><h4>Co-authored Works</h4><div id="pWorks"></div></div>
 </div>
 </div>
@@ -88,26 +101,24 @@ body{font-family:'Segoe UI',Arial,sans-serif;background:#0f1117;overflow:hidden;
 
 <script>
 /* ═══ CONFIG ═══ */
-const CFG = { API:'https://api.openalex.org', MAIL:'mailto=authorlinker2@example.com', MAX_WORKS:2000, MAX_CO:80, BATCH:25, PP:200, RETRY:3 };
+const CFG={API:'https://api.openalex.org',MAIL:'mailto=authorlinker2@example.com',MAX_WORKS:2000,MAX_CO:80,BATCH:25,PP:200,RETRY:3};
 
 /* ═══ REGION ═══ */
 const ASIA=new Set('CN JP KR TW HK MO SG IN TH VN MY PH ID BD PK LK NP MM KH LA MN BN KZ UZ KG TJ TM AF IQ IR SA AE IL TR QA KW BH OM YE JO LB SY PS'.split(' '));
 const EUAM=new Set('US GB DE FR CA AU NZ IT ES NL BE CH AT SE NO DK FI IE PT PL CZ SK HU RO BG HR SI RS GR UA RU LT LV EE IS LU MT CY MX BR AR CL CO PE VE EC UY PY BO CR PA DO GT HN SV NI CU JM TT PR'.split(' '));
 const COL={asia:'#f87171',euam:'#60a5fa',other:'#a78bfa'};
 const LBL={asia:'Asia',euam:'Europe & Americas',other:'Other / Unknown'};
-
 function toRegion(cc){if(!cc)return'other';cc=cc.toUpperCase();return ASIA.has(cc)?'asia':EUAM.has(cc)?'euam':'other'}
+function majority(arr){if(!arr.length)return'';const f={};for(const v of arr)f[v]=(f[v]||0)+1;let b='',m=0;for(const k in f)if(f[k]>m){m=f[k];b=k}return b}
 
-function majority(arr){
-    if(!arr.length)return'';
-    const f={};for(const v of arr)f[v]=(f[v]||0)+1;
-    let b='',m=0;for(const k in f)if(f[k]>m){m=f[k];b=k}return b;
-}
-
-/* ═══ API ═══ */
+/* ═══ UTIL ═══ */
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const $=id=>document.getElementById(id);
 
+/* ═══ HISTORY ═══ */
+const history=[];
+
+/* ═══ API ═══ */
 async function api(path){
     const url=`${CFG.API}${path}${path.includes('?')?'&':'?'}${CFG.MAIL}`;
     for(let i=0;i<CFG.RETRY;i++){
@@ -121,7 +132,11 @@ async function api(path){
 
 async function searchAuthors(q){return(await api(`/authors?search=${encodeURIComponent(q)}&per_page=10`)).results||[]}
 
-/* Cursor pagination: stable, complete traversal */
+async function fetchAuthorProfile(id){
+    const sid=id.replace('https://openalex.org/','');
+    return api(`/authors/${sid}`);
+}
+
 async function fetchWorks(authorId,onProg){
     const works=[];let cursor='*',total=null;
     const sid=authorId.replace('https://openalex.org/','');
@@ -136,21 +151,17 @@ async function fetchWorks(authorId,onProg){
     return{works:works.slice(0,CFG.MAX_WORKS),total:total||works.length};
 }
 
-/* Batch fetch author profiles for missing countries */
 async function batchAuthors(ids){
     const map=new Map();
     for(let i=0;i<ids.length;i+=CFG.BATCH){
         const batch=ids.slice(i,i+CFG.BATCH);
         const sids=batch.map(id=>id.replace('https://openalex.org/','')).join('|');
-        try{
-            const d=await api(`/authors?filter=ids.openalex:${sids}&per_page=${CFG.BATCH}`);
-            if(d.results)for(const r of d.results)map.set(r.id,r);
-        }catch(e){console.warn('batch err',e)}
+        try{const d=await api(`/authors?filter=ids.openalex:${sids}&per_page=${CFG.BATCH}`);if(d.results)for(const r of d.results)map.set(r.id,r)}catch(e){console.warn('batch err',e)}
     }
     return map;
 }
 
-/* ═══ DATA PROCESSING ═══ */
+/* ═══ DATA ═══ */
 function buildMap(works,authorId){
     const map=new Map();
     for(const w of works){
@@ -161,7 +172,6 @@ function buildMap(works,authorId){
             let e=map.get(id);
             if(!e){e={id,name:a.author.display_name||'Unknown',ccs:[],insts:[],count:0,works:[]};map.set(id,e)}
             e.count++;
-            /* Collect ALL country codes & institutions across every paper */
             if(a.institutions?.length){
                 for(const inst of a.institutions){
                     if(inst.country_code)e.ccs.push(inst.country_code);
@@ -175,7 +185,6 @@ function buildMap(works,authorId){
 }
 
 async function resolveRegions(collabs,onStatus){
-    /* Step A: find authors with zero country codes after scanning all papers */
     const missing=collabs.filter(c=>!c.ccs.length);
     if(missing.length){
         if(onStatus)onStatus(`Resolving ${missing.length} unknown regions…`);
@@ -189,12 +198,7 @@ async function resolveRegions(collabs,onStatus){
             }
         }
     }
-    /* Step B: majority vote across all collected codes */
-    for(const c of collabs){
-        c.country=majority(c.ccs);
-        c.inst=majority(c.insts);
-        c.region=toRegion(c.country);
-    }
+    for(const c of collabs){c.country=majority(c.ccs);c.inst=majority(c.insts);c.region=toRegion(c.country)}
 }
 
 function topCollabs(map){return[...map.values()].sort((a,b)=>b.count-a.count).slice(0,CFG.MAX_CO)}
@@ -283,22 +287,108 @@ function render(centerName,collabs){
     $('lg').style.display='block';
 }
 
+/* ═══ PANEL ═══ */
 function showPanel(d){
-    $('pn').classList.add('on');
+    const pn=$('pn');pn.classList.add('on');
     $('pName').textContent=d.name;
     $('pMeta').textContent=`${d.inst||'Unknown institution'}${d.country?' · '+d.country:''} · ${d.count} co-authored papers`;
     const rc=d.region==='asia'?'color:#f87171':d.region==='euam'?'color:#60a5fa':'color:#a78bfa';
     $('pBadge').innerHTML=`<span class="bd" style="border:1px solid;${rc}">${LBL[d.region]}</span>`;
-    $('pLink').href=d.id;
+
+    /* 需求1: 异步拉取最新单位 */
+    const instBox=$('pInst');instBox.style.display='block';
+    $('pInstName').innerHTML='<span class="mini-spin"></span> Loading…';
+    $('pInstSub').textContent='';
+    fetchAuthorProfile(d.id).then(p=>{
+        if(p.last_known_institutions?.length){
+            const i=p.last_known_institutions[0];
+            $('pInstName').textContent=i.display_name||'—';
+            const parts=[];
+            if(i.country_code)parts.push(i.country_code);
+            if(i.type)parts.push(i.type);
+            if(p.works_count)parts.push(p.works_count.toLocaleString()+' total works');
+            if(p.cited_by_count)parts.push(p.cited_by_count.toLocaleString()+' cites');
+            $('pInstSub').textContent=parts.join(' · ');
+        }else{
+            $('pInstName').textContent=d.inst||'Unknown';
+            $('pInstSub').textContent='No institution data on OpenAlex';
+        }
+    }).catch(()=>{
+        $('pInstName').textContent=d.inst||'Unknown';
+        $('pInstSub').textContent='(fallback from co-authorship data)';
+    });
+
+    /* 需求2+3: 应用内重新搜索按钮 */
+    $('pActions').innerHTML='';
+    const btnExplore=document.createElement('span');
+    btnExplore.className='rbtn';
+    btnExplore.textContent='🔍 Explore this author\'s network';
+    btnExplore.onclick=()=>exploreById(d.id,d.name);
+    $('pActions').appendChild(btnExplore);
+
+    const btnSearch=document.createElement('span');
+    btnSearch.className='rbtn';
+    btnSearch.style.marginLeft='6px';
+    btnSearch.textContent='🔎 Search by name';
+    btnSearch.onclick=()=>{$('inp').value=d.name;doSearch()};
+    $('pActions').appendChild(btnSearch);
+
+    /* History */
+    if(history.length){
+        $('pHist').style.display='';
+        $('pHistList').innerHTML=history.map((h,i)=>`<div class="hist-item"><a data-idx="${i}">📌 ${h.name}</a></div>`).join('');
+        $('pHistList').querySelectorAll('a').forEach(a=>a.onclick=()=>{const h=history[+a.dataset.idx];exploreById(h.id,h.name)});
+    }else $('pHist').style.display='none';
+
+    /* Works list */
     if(d.works?.length){
         $('pWorks').innerHTML=d.works.map(w=>`<div class="crow"><span>${w.title.length>50?w.title.slice(0,49)+'…':w.title}</span><span class="yr">${w.year}</span></div>`).join('');
         $('pSec').style.display='';
     }else $('pSec').style.display='none';
 }
 
+/* ═══ CORE FLOW ═══ */
+async function exploreById(authorId,authorName){
+    closeModal();
+    $('btn').disabled=true;
+    $('pn').classList.remove('on');
+    $('hint').style.display='none';
+    try{
+        loader(true,'Fetching author profile…');status('⏳ Loading profile…');
+        const profile=await fetchAuthorProfile(authorId);
+        const author={id:profile.id,display_name:profile.display_name||authorName,works_count:profile.works_count,cited_by_count:profile.cited_by_count,last_known_institutions:profile.last_known_institutions};
+        await runPipeline(author);
+    }catch(e){status('❌ '+e.message);console.error(e)}
+    finally{$('btn').disabled=false;loader(false)}
+}
+
+async function runPipeline(author){
+    /* Add to history (deduplicate) */
+    if(!history.find(h=>h.id===author.id))history.unshift({id:author.id,name:author.display_name});
+    if(history.length>10)history.length=10;
+
+    loader(true,'Fetching works (cursor)…');status('⏳ Fetching…');
+    const{works,total}=await fetchWorks(author.id,(n,t)=>{loader(true,`Fetching works: ${n}/${t}…`)});
+    if(!works.length){status('❌ No works found');loader(false);return}
+    const cov=total>0?Math.round(works.length/total*100):100;
+
+    loader(true,'Building collaboration map…');status('⏳ Analyzing…');
+    const map=buildMap(works,author.id);
+    const collabs=topCollabs(map);
+    if(!collabs.length){status('❌ No collaborators found');loader(false);return}
+
+    await resolveRegions(collabs,m=>{loader(true,m);status('⏳ '+m)});
+
+    status(`✅ ${author.display_name} · ${works.length}/${total} works (${cov}%) · ${collabs.length} collaborators`);
+    $('cov').textContent=`📊 ${works.length}/${total} works (${cov}%)`;
+    render(author.display_name,collabs);
+    loader(false);
+}
+
 /* ═══ UI ═══ */
 function status(m){$('st').textContent=m}
 function loader(on,m){$('ld').classList.toggle('on',on);if(m)$('lt').textContent=m}
+function closeModal(){$('mo').classList.remove('on')}
 
 function openModal(authors){
     $('al').innerHTML='';
@@ -308,36 +398,19 @@ function openModal(authors){
         const inst=a.last_known_institutions?.[0]?.display_name||'Unknown';
         const cc=a.last_known_institutions?.[0]?.country_code||'';
         c.innerHTML=`<div class="n">${a.display_name}</div><div class="i">🏛 ${inst}${cc?' ('+cc+')':''}</div><div class="s">📝 ${(a.works_count||0).toLocaleString()} works · 📖 ${(a.cited_by_count||0).toLocaleString()} cites</div>`;
-        c.onclick=()=>pick(a);
+        c.onclick=()=>pickFromModal(a);
         $('al').appendChild(c);
     }
     $('mo').classList.add('on');
 }
-function closeModal(){$('mo').classList.remove('on')}
 
-async function pick(author){
+async function pickFromModal(author){
     closeModal();
     $('btn').disabled=true;
     $('pn').classList.remove('on');
     $('hint').style.display='none';
-    try{
-        loader(true,'Fetching works (cursor)…');status('⏳ Fetching…');
-        const{works,total}=await fetchWorks(author.id,(n,t)=>{loader(true,`Fetching works: ${n}/${t}…`)});
-        if(!works.length){status('❌ No works found');return}
-        const cov=total>0?Math.round(works.length/total*100):100;
-
-        loader(true,'Building collaboration map…');status('⏳ Analyzing…');
-        const map=buildMap(works,author.id);
-        const collabs=topCollabs(map);
-        if(!collabs.length){status('❌ No collaborators found');return}
-
-        /* Resolve regions: majority vote + batch fallback */
-        await resolveRegions(collabs,m=>{loader(true,m);status('⏳ '+m)});
-
-        status(`✅ ${author.display_name} · ${works.length}/${total} works (${cov}%) · ${collabs.length} collaborators`);
-        $('cov').textContent=`📊 ${works.length}/${total} works (${cov}%)`;
-        render(author.display_name,collabs);
-    }catch(e){status('❌ '+e.message);console.error(e)}
+    try{await runPipeline(author)}
+    catch(e){status('❌ '+e.message);console.error(e)}
     finally{$('btn').disabled=false;loader(false)}
 }
 
@@ -358,7 +431,7 @@ $('btn').onclick=doSearch;
 $('inp').onkeydown=e=>{if(e.key==='Enter')doSearch()};
 $('mx').onclick=closeModal;
 $('mo').onclick=e=>{if(e.target===$('mo'))closeModal()};
-document.onkeydown=e=>{if(e.key==='Escape')closeModal()};
+document.onkeydown=e=>{if(e.key==='Escape'){closeModal();$('pn').classList.remove('on')}};
 window.onresize=()=>{const el=$('svg').parentElement;d3.select('#svg').attr('width',el.clientWidth).attr('height',el.clientHeight)};
 </script>
 </body>
