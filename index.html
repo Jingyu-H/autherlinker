@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Author Linker2</title>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#0f1117;overflow:hidden;height:100vh;color:#e0e0e0}
+.topbar{background:#1a1d27;padding:10px 20px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,.4);z-index:10;position:relative}
+.topbar h1{font-size:1em;color:#7c8cf8;white-space:nowrap}
+.topbar input{flex:1;padding:7px 16px;border:2px solid #2d3040;border-radius:20px;font-size:.9em;outline:none;background:#12141c;color:#e0e0e0}
+.topbar input:focus{border-color:#7c8cf8}
+.topbar button{padding:7px 18px;background:#7c8cf8;color:#fff;border:none;border-radius:20px;cursor:pointer;font-weight:600;font-size:.9em}
+.topbar button:disabled{background:#444;cursor:not-allowed}
+.status{font-size:.75em;color:#888;white-space:nowrap;max-width:340px;overflow:hidden;text-overflow:ellipsis}
+.main{display:flex;height:calc(100vh - 52px)}
+.graph-area{position:relative;flex:1;overflow:hidden}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:none;justify-content:center;align-items:center}
+.modal-overlay.on{display:flex}
+.modal-box{background:#1a1d27;border-radius:14px;padding:20px;max-width:560px;width:92%;max-height:70vh;overflow-y:auto;border:1px solid #2d3040}
+.modal-box h3{color:#e8e8e8;margin-bottom:12px;font-size:.95em}
+.modal-box .xbtn{float:right;background:none;border:none;color:#666;font-size:1.1em;cursor:pointer}
+.acard{padding:12px 14px;border:1px solid #2d3040;border-radius:8px;margin-bottom:6px;cursor:pointer;transition:.12s}
+.acard:hover{border-color:#7c8cf8;background:rgba(124,140,248,.06)}
+.acard .n{font-weight:600;color:#e8e8e8;font-size:.9em}
+.acard .i{color:#aaa;font-size:.78em;margin-top:2px}
+.acard .s{color:#666;font-size:.72em;margin-top:2px}
+.panel{width:340px;background:#1a1d27;border-left:1px solid #2d3040;padding:20px;overflow-y:auto;flex-shrink:0;display:none}
+.panel.on{display:block}
+.panel h2{font-size:.95em;color:#e8e8e8;margin-bottom:4px}
+.panel .pm{font-size:.78em;color:#888;margin-bottom:6px}
+.panel .bd{display:inline-block;font-size:.7em;padding:2px 8px;border-radius:10px;margin-right:4px}
+.panel a{color:#7c8cf8;text-decoration:none;font-size:.82em}
+.panel .sec{margin-top:10px;border-top:1px solid #2d3040;padding-top:10px}
+.panel .sec h4{font-size:.8em;color:#aaa;margin-bottom:6px}
+.crow{font-size:.78em;color:#bbb;padding:4px 0;display:flex;justify-content:space-between;border-bottom:1px solid rgba(45,48,64,.4)}
+.crow:last-child{border-bottom:none}
+.crow .yr{color:#7c8cf8;font-weight:600;margin-left:8px;white-space:nowrap}
+.legend{position:absolute;bottom:16px;left:16px;background:rgba(26,29,39,.95);border-radius:10px;padding:10px 14px;font-size:.72em;color:#999;border:1px solid #2d3040;display:none}
+.legend .r{display:flex;align-items:center;gap:6px;margin:3px 0}
+.legend .d{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.tooltip{position:absolute;background:rgba(20,22,30,.96);color:#e0e0e0;padding:8px 14px;border-radius:8px;font-size:.77em;max-width:340px;pointer-events:none;z-index:100;line-height:1.5;border:1px solid #2d3040;display:none}
+.hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#555;font-size:1em;text-align:center;line-height:2}
+.loader{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;display:none;z-index:20}
+.loader.on{display:block}
+.spinner{width:32px;height:32px;border:3px solid #2d3040;border-top-color:#7c8cf8;border-radius:50%;animation:sp .6s linear infinite;margin:0 auto 10px}
+@keyframes sp{to{transform:rotate(360deg)}}
+.loader span{font-size:.82em;color:#888}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+<h1>🧑‍🔬 Author Linker2</h1>
+<input id="inp" placeholder="Enter researcher name…">
+<button id="btn">Search</button>
+<span class="status" id="st"></span>
+</div>
+
+<div class="modal-overlay" id="mo"><div class="modal-box"><button class="xbtn" id="mx">✕</button><h3 id="mt"></h3><div id="al"></div></div></div>
+
+<div class="main">
+<div class="graph-area">
+<svg id="svg"></svg>
+<div class="hint" id="hint">Author Linker2<br><span style="font-size:.8em;color:#444">Search a researcher → select → view collaboration network</span></div>
+<div class="loader" id="ld"><div class="spinner"></div><span id="lt"></span></div>
+<div class="legend" id="lg">
+<div style="margin-bottom:4px"><strong>Region</strong></div>
+<div class="r"><div class="d" style="background:#f87171"></div>Asia</div>
+<div class="r"><div class="d" style="background:#60a5fa"></div>Europe & Americas</div>
+<div class="r"><div class="d" style="background:#a78bfa"></div>Other / Unknown</div>
+<div style="margin-top:6px"><strong>Node size</strong> = Co-authored papers</div>
+<div id="cov" style="margin-top:4px;color:#666"></div>
+</div>
+</div>
+<div class="panel" id="pn">
+<h2 id="pName"></h2>
+<div class="pm" id="pMeta"></div>
+<div id="pBadge"></div>
+<a id="pLink" href="#" target="_blank">→ OpenAlex Profile</a>
+<div class="sec" id="pSec"><h4>Co-authored Works</h4><div id="pWorks"></div></div>
+</div>
+</div>
+
+<div class="tooltip" id="tp"></div>
+
+<script>
+/* ═══ CONFIG ═══ */
+const CFG = { API:'https://api.openalex.org', MAIL:'mailto=authorlinker2@example.com', MAX_WORKS:2000, MAX_CO:80, BATCH:25, PP:200, RETRY:3 };
+
+/* ═══ REGION ═══ */
+const ASIA=new Set('CN JP KR TW HK MO SG IN TH VN MY PH ID BD PK LK NP MM KH LA MN BN KZ UZ KG TJ TM AF IQ IR SA AE IL TR QA KW BH OM YE JO LB SY PS'.split(' '));
+const EUAM=new Set('US GB DE FR CA AU NZ IT ES NL BE CH AT SE NO DK FI IE PT PL CZ SK HU RO BG HR SI RS GR UA RU LT LV EE IS LU MT CY MX BR AR CL CO PE VE EC UY PY BO CR PA DO GT HN SV NI CU JM TT PR'.split(' '));
+const COL={asia:'#f87171',euam:'#60a5fa',other:'#a78bfa'};
+const LBL={asia:'Asia',euam:'Europe & Americas',other:'Other / Unknown'};
+
+function toRegion(cc){if(!cc)return'other';cc=cc.toUpperCase();return ASIA.has(cc)?'asia':EUAM.has(cc)?'euam':'other'}
+
+function majority(arr){
+    if(!arr.length)return'';
+    const f={};for(const v of arr)f[v]=(f[v]||0)+1;
+    let b='',m=0;for(const k in f)if(f[k]>m){m=f[k];b=k}return b;
+}
+
+/* ═══ API ═══ */
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+const $=id=>document.getElementById(id);
+
+async function api(path){
+    const url=`${CFG.API}${path}${path.includes('?')?'&':'?'}${CFG.MAIL}`;
+    for(let i=0;i<CFG.RETRY;i++){
+        const r=await fetch(url);
+        if(r.status===429){await sleep(1000*(i+1));continue}
+        if(!r.ok)throw new Error('API '+r.status);
+        return r.json();
+    }
+    throw new Error('Rate limited');
+}
+
+async function searchAuthors(q){return(await api(`/authors?search=${encodeURIComponent(q)}&per_page=10`)).results||[]}
+
+/* Cursor pagination: stable, complete traversal */
+async function fetchWorks(authorId,onProg){
+    const works=[];let cursor='*',total=null;
+    const sid=authorId.replace('https://openalex.org/','');
+    while(cursor&&works.length<CFG.MAX_WORKS){
+        const d=await api(`/works?filter=author.id:${sid}&per_page=${CFG.PP}&cursor=${encodeURIComponent(cursor)}&select=id,title,publication_year,authorships`);
+        if(!d.results?.length)break;
+        works.push(...d.results);
+        if(total===null)total=d.meta?.count||0;
+        cursor=d.meta?.next_cursor||null;
+        if(onProg)onProg(Math.min(works.length,CFG.MAX_WORKS),total);
+    }
+    return{works:works.slice(0,CFG.MAX_WORKS),total:total||works.length};
+}
+
+/* Batch fetch author profiles for missing countries */
+async function batchAuthors(ids){
+    const map=new Map();
+    for(let i=0;i<ids.length;i+=CFG.BATCH){
+        const batch=ids.slice(i,i+CFG.BATCH);
+        const sids=batch.map(id=>id.replace('https://openalex.org/','')).join('|');
+        try{
+            const d=await api(`/authors?filter=ids.openalex:${sids}&per_page=${CFG.BATCH}`);
+            if(d.results)for(const r of d.results)map.set(r.id,r);
+        }catch(e){console.warn('batch err',e)}
+    }
+    return map;
+}
+
+/* ═══ DATA PROCESSING ═══ */
+function buildMap(works,authorId){
+    const map=new Map();
+    for(const w of works){
+        if(!w.authorships)continue;
+        for(const a of w.authorships){
+            if(!a.author?.id||a.author.id===authorId)continue;
+            const id=a.author.id;
+            let e=map.get(id);
+            if(!e){e={id,name:a.author.display_name||'Unknown',ccs:[],insts:[],count:0,works:[]};map.set(id,e)}
+            e.count++;
+            /* Collect ALL country codes & institutions across every paper */
+            if(a.institutions?.length){
+                for(const inst of a.institutions){
+                    if(inst.country_code)e.ccs.push(inst.country_code);
+                    if(inst.display_name)e.insts.push(inst.display_name);
+                }
+            }
+            if(e.works.length<20)e.works.push({title:w.title||'Untitled',year:w.publication_year||''});
+        }
+    }
+    return map;
+}
+
+async function resolveRegions(collabs,onStatus){
+    /* Step A: find authors with zero country codes after scanning all papers */
+    const missing=collabs.filter(c=>!c.ccs.length);
+    if(missing.length){
+        if(onStatus)onStatus(`Resolving ${missing.length} unknown regions…`);
+        const profiles=await batchAuthors(missing.map(c=>c.id));
+        for(const c of missing){
+            const p=profiles.get(c.id);
+            if(p?.last_known_institutions?.length){
+                const inst=p.last_known_institutions[0];
+                if(inst.country_code)c.ccs.push(inst.country_code);
+                if(inst.display_name&&!c.insts.length)c.insts.push(inst.display_name);
+            }
+        }
+    }
+    /* Step B: majority vote across all collected codes */
+    for(const c of collabs){
+        c.country=majority(c.ccs);
+        c.inst=majority(c.insts);
+        c.region=toRegion(c.country);
+    }
+}
+
+function topCollabs(map){return[...map.values()].sort((a,b)=>b.count-a.count).slice(0,CFG.MAX_CO)}
+
+/* ═══ VISUALIZATION ═══ */
+let sim=null;
+
+function render(centerName,collabs){
+    if(sim)sim.stop();
+    const svg=d3.select('#svg');svg.selectAll('*').remove();
+    const W=svg.node().parentElement.clientWidth,H=svg.node().parentElement.clientHeight;
+    svg.attr('width',W).attr('height',H);
+
+    const mx=d3.max(collabs,d=>d.count)||1;
+    const rS=d3.scaleSqrt().domain([1,mx]).range([7,44]);
+    const lwS=d3.scaleLinear().domain([1,mx]).range([.4,5]).clamp(true);
+
+    const center={id:'__c__',name:centerName,isCenter:true,r:28,fx:W/2,fy:H/2};
+    const nodes=[center,...collabs.map(d=>({...d,r:rS(d.count)}))];
+    const links=collabs.map(d=>({source:'__c__',target:d.id,value:d.count}));
+
+    sim=d3.forceSimulation(nodes)
+        .force('link',d3.forceLink(links).id(d=>d.id).distance(d=>100+(1-d.value/mx)*140).strength(d=>.15+.4*(d.value/mx)))
+        .force('charge',d3.forceManyBody().strength(d=>d.isCenter?-800:-80))
+        .force('center',d3.forceCenter(W/2,H/2).strength(.03))
+        .force('collide',d3.forceCollide().radius(d=>d.r+5));
+
+    const g=svg.append('g');
+    svg.call(d3.zoom().scaleExtent([.1,10]).on('zoom',e=>g.attr('transform',e.transform)));
+
+    const linkEl=g.append('g').selectAll('line').data(links).join('line')
+        .attr('stroke','#3d4060').attr('stroke-width',d=>lwS(d.value)).attr('stroke-opacity',.45);
+
+    const glowEl=g.append('g').selectAll('circle').data(nodes).join('circle')
+        .attr('r',d=>d.r+4).attr('fill','none')
+        .attr('stroke',d=>d.isCenter?'#fff':COL[d.region]||COL.other)
+        .attr('stroke-opacity',.12).attr('stroke-width',6);
+
+    const nodeEl=g.append('g').selectAll('circle').data(nodes).join('circle')
+        .attr('r',d=>d.r)
+        .attr('fill',d=>d.isCenter?'#1a1d27':COL[d.region]||COL.other)
+        .attr('stroke',d=>d.isCenter?'#fff':'#1a1d27')
+        .attr('stroke-width',d=>d.isCenter?2.5:1.2)
+        .attr('cursor',d=>d.isCenter?'default':'pointer')
+        .call(d3.drag()
+            .on('start',(e,d)=>{if(!e.active)sim.alphaTarget(.3).restart();if(!d.isCenter){d.fx=d.x;d.fy=d.y}})
+            .on('drag',(e,d)=>{if(!d.isCenter){d.fx=e.x;d.fy=e.y}})
+            .on('end',(e,d)=>{if(!e.active)sim.alphaTarget(0);if(!d.isCenter){d.fx=null;d.fy=null}}));
+
+    const cntEl=g.append('g').selectAll('text').data(nodes.filter(d=>!d.isCenter)).join('text')
+        .attr('text-anchor','middle').attr('dy','.35em')
+        .attr('font-size',d=>Math.max(6,d.r*.5)+'px')
+        .attr('fill','#fff').attr('font-weight','700').attr('pointer-events','none')
+        .text(d=>d.count);
+
+    const icoEl=g.append('text').datum(center)
+        .attr('text-anchor','middle').attr('dy','.35em')
+        .attr('font-size','16px').attr('pointer-events','none').text('👤');
+
+    const lblEl=g.append('g').selectAll('text').data(nodes).join('text')
+        .attr('text-anchor','middle').attr('dy',d=>d.r+12)
+        .attr('font-size',d=>d.isCenter?'10px':'7px')
+        .attr('fill',d=>d.isCenter?'#ccc':'#666')
+        .attr('font-weight',d=>d.isCenter?'700':'400')
+        .attr('pointer-events','none')
+        .text(d=>{const n=d.name;const m=d.isCenter?30:22;return n.length>m?n.slice(0,m-1)+'…':n});
+
+    const tp=$('tp');
+    nodeEl.on('mouseover',(e,d)=>{
+        if(d.isCenter)return;tp.style.display='block';
+        tp.innerHTML=`<strong>${d.name}</strong>${d.country?' ('+d.country+')':''}<br>🌍 ${LBL[d.region]}<br>🏛 ${d.inst||'N/A'}<br>📄 ${d.count} co-authored paper${d.count>1?'s':''}`;
+        d3.select(e.target).attr('stroke','#fff').attr('stroke-width',3);
+    })
+    .on('mousemove',e=>{tp.style.left=(e.pageX+12)+'px';tp.style.top=(e.pageY-14)+'px'})
+    .on('mouseout',(e,d)=>{tp.style.display='none';d3.select(e.target).attr('stroke',d.isCenter?'#fff':'#1a1d27').attr('stroke-width',d.isCenter?2.5:1.2)})
+    .on('click',(e,d)=>{if(!d.isCenter)showPanel(d)});
+
+    sim.on('tick',()=>{
+        linkEl.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y).attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
+        glowEl.attr('cx',d=>d.x).attr('cy',d=>d.y);
+        nodeEl.attr('cx',d=>d.x).attr('cy',d=>d.y);
+        cntEl.attr('x',d=>d.x).attr('y',d=>d.y);
+        icoEl.attr('x',center.x).attr('y',center.y);
+        lblEl.attr('x',d=>d.x).attr('y',d=>d.y);
+    });
+    $('lg').style.display='block';
+}
+
+function showPanel(d){
+    $('pn').classList.add('on');
+    $('pName').textContent=d.name;
+    $('pMeta').textContent=`${d.inst||'Unknown institution'}${d.country?' · '+d.country:''} · ${d.count} co-authored papers`;
+    const rc=d.region==='asia'?'color:#f87171':d.region==='euam'?'color:#60a5fa':'color:#a78bfa';
+    $('pBadge').innerHTML=`<span class="bd" style="border:1px solid;${rc}">${LBL[d.region]}</span>`;
+    $('pLink').href=d.id;
+    if(d.works?.length){
+        $('pWorks').innerHTML=d.works.map(w=>`<div class="crow"><span>${w.title.length>50?w.title.slice(0,49)+'…':w.title}</span><span class="yr">${w.year}</span></div>`).join('');
+        $('pSec').style.display='';
+    }else $('pSec').style.display='none';
+}
+
+/* ═══ UI ═══ */
+function status(m){$('st').textContent=m}
+function loader(on,m){$('ld').classList.toggle('on',on);if(m)$('lt').textContent=m}
+
+function openModal(authors){
+    $('al').innerHTML='';
+    $('mt').textContent=authors.length>1?`${authors.length} authors found — select one:`:'Confirm this author:';
+    for(const a of authors){
+        const c=document.createElement('div');c.className='acard';
+        const inst=a.last_known_institutions?.[0]?.display_name||'Unknown';
+        const cc=a.last_known_institutions?.[0]?.country_code||'';
+        c.innerHTML=`<div class="n">${a.display_name}</div><div class="i">🏛 ${inst}${cc?' ('+cc+')':''}</div><div class="s">📝 ${(a.works_count||0).toLocaleString()} works · 📖 ${(a.cited_by_count||0).toLocaleString()} cites</div>`;
+        c.onclick=()=>pick(a);
+        $('al').appendChild(c);
+    }
+    $('mo').classList.add('on');
+}
+function closeModal(){$('mo').classList.remove('on')}
+
+async function pick(author){
+    closeModal();
+    $('btn').disabled=true;
+    $('pn').classList.remove('on');
+    $('hint').style.display='none';
+    try{
+        loader(true,'Fetching works (cursor)…');status('⏳ Fetching…');
+        const{works,total}=await fetchWorks(author.id,(n,t)=>{loader(true,`Fetching works: ${n}/${t}…`)});
+        if(!works.length){status('❌ No works found');return}
+        const cov=total>0?Math.round(works.length/total*100):100;
+
+        loader(true,'Building collaboration map…');status('⏳ Analyzing…');
+        const map=buildMap(works,author.id);
+        const collabs=topCollabs(map);
+        if(!collabs.length){status('❌ No collaborators found');return}
+
+        /* Resolve regions: majority vote + batch fallback */
+        await resolveRegions(collabs,m=>{loader(true,m);status('⏳ '+m)});
+
+        status(`✅ ${author.display_name} · ${works.length}/${total} works (${cov}%) · ${collabs.length} collaborators`);
+        $('cov').textContent=`📊 ${works.length}/${total} works (${cov}%)`;
+        render(author.display_name,collabs);
+    }catch(e){status('❌ '+e.message);console.error(e)}
+    finally{$('btn').disabled=false;loader(false)}
+}
+
+async function doSearch(){
+    const q=$('inp').value.trim();if(!q)return;
+    $('btn').disabled=true;$('pn').classList.remove('on');$('hint').style.display='none';status('');
+    loader(true,'Searching…');
+    try{
+        const r=await searchAuthors(q);
+        if(!r.length){status('❌ No authors found');return}
+        status(`${r.length} result(s)`);openModal(r);
+    }catch(e){status('❌ '+e.message)}
+    finally{$('btn').disabled=false;loader(false)}
+}
+
+/* ═══ EVENTS ═══ */
+$('btn').onclick=doSearch;
+$('inp').onkeydown=e=>{if(e.key==='Enter')doSearch()};
+$('mx').onclick=closeModal;
+$('mo').onclick=e=>{if(e.target===$('mo'))closeModal()};
+document.onkeydown=e=>{if(e.key==='Escape')closeModal()};
+window.onresize=()=>{const el=$('svg').parentElement;d3.select('#svg').attr('width',el.clientWidth).attr('height',el.clientHeight)};
+</script>
+</body>
+</html>
