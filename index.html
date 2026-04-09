@@ -19,8 +19,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
   border-radius:var(--radius);overflow:hidden;background:var(--card);
   box-shadow:0 1px 3px rgba(0,0,0,.04);
 }
-
-/* ── Header ── */
 #hd{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--bg);flex-wrap:wrap}
 #hd input{padding:5px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;outline:none;width:220px;background:var(--card)}
 #hd input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(9,105,218,.12)}
@@ -29,8 +27,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
 .bp{background:var(--green)!important;color:#fff!important;border-color:var(--green)!important}
 .bp:hover{background:#15692e!important}
 .langb{font-size:12px;padding:4px 10px!important;min-width:40px;font-weight:600;letter-spacing:.3px}
-
-/* ── Info bar ── */
 #ib{display:none;padding:8px 16px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2);align-items:center;gap:10px;flex-wrap:wrap;background:var(--card)}
 #ib.on{display:flex}
 .badge{background:#ddf4ff;color:var(--accent);padding:2px 10px;border-radius:12px;font-weight:600}
@@ -39,8 +35,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
 .yg .yb{padding:2px 10px;font-size:12px;cursor:pointer;border:1px solid var(--border);border-radius:4px;background:var(--bg)}
 .yg .yb:hover{background:#eaeef2}
 #st{margin-left:auto;white-space:nowrap}
-
-/* ── Collab search ── */
 #cw{position:relative;z-index:8;display:none;border-bottom:1px solid var(--border);background:var(--card)}
 #cw.on{display:block}
 #cb{display:flex;align-items:center;gap:8px;padding:8px 16px}
@@ -49,19 +43,13 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
 #cd{position:absolute;left:16px;right:16px;top:100%;background:var(--card);border:1px solid var(--border);border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.08);max-height:220px;overflow-y:auto;z-index:60;display:none}
 .di{padding:8px 12px;cursor:pointer;font-size:13px}.di:hover{background:var(--bg)}
 .di .dn{font-weight:600;color:var(--accent)}.di .dm{color:var(--text2);font-size:12px;margin-top:1px}
-
-/* ── Graph container ── */
 #gc{position:relative;width:100%;height:560px;background:var(--card)}
 #gs{width:100%;height:100%;display:block}
-
-/* ── Legend ── */
 #lg{position:absolute;bottom:12px;left:12px;background:rgba(255,255,255,.92);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:12px;color:var(--text2);display:none}
 #lg.on{display:block}
 #lg h5{font-size:11px;margin-bottom:4px;color:var(--text);font-weight:600}
 .lr{display:flex;align-items:center;gap:6px;margin:3px 0}
 .ld{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-
-/* ── Detail panel ── */
 #dp{position:absolute;top:0;right:0;width:320px;height:100%;background:var(--card);border-left:1px solid var(--border);box-shadow:-2px 0 8px rgba(0,0,0,.04);transform:translateX(100%);transition:transform .25s ease;z-index:50;overflow-y:auto}
 #dp.open{transform:translateX(0)}
 .ph{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--card);z-index:1}
@@ -70,45 +58,29 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
 .df{margin-bottom:14px}.df .dl{font-size:12px;color:var(--text2);margin-bottom:2px}.df .dv{font-size:14px;font-weight:500}
 .pl{list-style:none}.pl li{padding:6px 0;border-bottom:1px solid #f0f2f5;font-size:13px;line-height:1.4}
 .yt{display:inline-block;background:#ddf4ff;color:var(--accent);padding:1px 6px;border-radius:4px;font-size:11px;margin-right:4px}
-
-/* ── Explore button ── */
 .sa{display:block;width:100%;padding:9px 12px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:13px;cursor:pointer;text-align:center;margin-bottom:16px;font-weight:500;transition:background .15s}
 .sa:hover{background:#0550ae}
-
-/* ── Tooltip ── */
 .tp{position:absolute;background:#1f2328;color:#fff;padding:6px 10px;border-radius:6px;font-size:12px;pointer-events:none;z-index:300;white-space:nowrap;display:none;max-width:340px;overflow:hidden;text-overflow:ellipsis}
-
-/* ── Loading ── */
 #lo{position:absolute;inset:0;background:rgba(255,255,255,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100}
 #lo.off{display:none}
 .sp{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:rot .7s linear infinite}
 @keyframes rot{to{transform:rotate(360deg)}}
 #lo .lt{margin-top:12px;color:var(--text2);font-size:14px}
-
-/* ── Welcome ── */
 #wc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--card);z-index:10}
 #wc.off{display:none}
 #wc h2{font-size:22px;margin-bottom:6px}
 #wc p{color:var(--text2);font-size:14px;text-align:center;padding:0 20px;line-height:1.6}
-
-/* ── Modal ── */
 .mo{position:fixed;inset:0;background:rgba(0,0,0,.22);display:flex;align-items:center;justify-content:center;z-index:200}
 .mo.off{display:none}
 .mx{background:var(--card);border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.12);width:92%;max-width:480px;max-height:75vh;overflow:auto}
 .mh{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
 .mh h3{font-size:16px;font-weight:600}
 .md{padding:8px 20px 16px}
-
-/* ── Close btn ── */
 .xb{background:none;border:none;font-size:18px;color:var(--text2);cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:6px;flex-shrink:0}
 .xb:hover{background:#f3f4f6;color:var(--text)}
-
-/* ── Author item ── */
 .ai{padding:10px 12px;border-radius:6px;cursor:pointer;border:1px solid transparent;margin-bottom:2px}
 .ai:hover{background:var(--bg);border-color:var(--border)}
 .ai .an{font-weight:600;color:var(--accent)}.ai .am{font-size:12px;color:var(--text2);margin-top:2px}
-
-/* ── Time filter ── */
 .tf{padding:24px 20px;text-align:center}
 .tf .th{font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.7;white-space:pre-line}
 .tf .tr{display:flex;align-items:center;justify-content:center;gap:12px;margin:16px 0}
@@ -116,14 +88,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
 .tf input[type="number"]:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(9,105,218,.12);outline:none}
 .tf button{padding:8px 28px;background:var(--green);color:#fff;border:none;border-radius:6px;font-size:14px;cursor:pointer;font-weight:500}
 .tf button:hover{background:#15692e}
-
-/* ── D3 graph ── */
 .nl{font-size:10px;fill:var(--text2);pointer-events:none;text-anchor:middle}
 .ncl{font-size:12px;fill:var(--text);font-weight:700;pointer-events:none;text-anchor:middle}
 .gl{stroke:#d0d7de;stroke-opacity:.45}
 .nf{opacity:.1}.lf{opacity:.03}
 .nh circle{stroke:#cf222e!important;stroke-width:3px!important}
-
 @media(max-width:700px){
   #dp{width:100%}
   #hd input{width:130px}
@@ -133,9 +102,7 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
 </style>
 </head>
 <body>
-
 <div id="app">
-  <!-- Header -->
   <div id="hd">
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#656d76" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
     <input type="text" id="si" placeholder="Search author name...">
@@ -144,8 +111,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
     <button onclick="loadExample()" id="btnExample">Example</button>
     <button onclick="toggleLang()" id="btnLang" class="langb">中文</button>
   </div>
-
-  <!-- Info bar -->
   <div id="ib">
     <span id="ibCur">Current:</span>
     <span class="badge" id="cn"></span>
@@ -158,8 +123,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
     <span id="st"></span>
     <button class="xb" onclick="closeAll()" title="Close">✕</button>
   </div>
-
-  <!-- Collab search -->
   <div id="cw">
     <div id="cb">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#656d76" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -168,8 +131,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
     </div>
     <div id="cd"></div>
   </div>
-
-  <!-- Graph -->
   <div id="gc">
     <svg id="gs"></svg>
     <div id="lg"><h5 id="lgTitle">Region</h5><div id="lbd"></div></div>
@@ -185,16 +146,12 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
     </div>
   </div>
 </div>
-
-<!-- Author modal -->
 <div class="mo off" id="am">
   <div class="mx">
     <div class="mh"><h3 id="amTitle">Select Author</h3><button class="xb" onclick="cM('am')">✕</button></div>
     <div class="md" id="al"></div>
   </div>
 </div>
-
-<!-- Time modal -->
 <div class="mo off" id="tm">
   <div class="mx">
     <div class="mh"><h3 id="tmTitle">📅 Set Time Range</h3><button class="xb" onclick="cM('tm')">✕</button></div>
@@ -209,122 +166,84 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
     </div>
   </div>
 </div>
-
 <script>
-/* ═══════════════════════════════════════
-   Language System
-   ═══════════════════════════════════════ */
 let lang='en';
 const TR={
   en:{
-    search:'Search', example:'Example', current:'Current:', apply:'Apply',
-    region:'Region', asia:'Asia', euroAm:'Europe & Americas', others:'Others',
-    details:'Details', institution:'Institution', countryRegion:'Country / Region',
-    coauthoredPapers:'Co-authored Papers', coauthorCount:'Co-authored Papers',
-    yearSpan:'Year Span', exploreNetwork:'🔍 Explore this author\'s network',
-    selectAuthor:'Select Author', setTimeRange:'📅 Set Time Range',
+    search:'Search',example:'Example',current:'Current:',apply:'Apply',
+    region:'Region',asia:'Asia',euroAm:'Europe & Americas',others:'Others',
+    details:'Details',institution:'Institution',countryRegion:'Country / Region',
+    coauthoredPapers:'Co-authored Papers',coauthorCount:'Co-authored Papers',
+    yearSpan:'Year Span',exploreNetwork:'🔍 Explore this author\'s network',
+    selectAuthor:'Select Author',setTimeRange:'📅 Set Time Range',
     generate:'Generate Graph',
     title:'Academic Collaboration Network',
     subtitle:'Search any author name to explore collaboration networks<br>Powered by OpenAlex open data',
-    loading:'Loading…', searchingAuthor:'Searching authors…',
-    loadingPapers:'Loading papers for', loadingExample:'Loading example…',
-    papersLoaded:'papers loaded', collaborators:'collaborators',
-    showingTop60:'showing top 60', noMatch:'No matching collaborators found',
+    loading:'Loading…',searchingAuthor:'Searching authors…',
+    loadingPapers:'Loading papers for',loadingExample:'Loading example…',
+    papersLoaded:'papers loaded',collaborators:'collaborators',
+    showingTop60:'showing top 60',noMatch:'No matching collaborators found',
     collabPH:'Search collaborators by name, institution…',
     authorPH:'Search author name…',
-    papers:'papers', cited:'cited by', coauthored:'co-authored',
-    yearRange:'Year range', totalPapers:'papers total',
+    papers:'papers',cited:'cited by',coauthored:'co-authored',
+    yearRange:'Year range',totalPapers:'papers total',
     narrowRange:'You may narrow the range to focus on specific periods',
-    more:'more', unknown:'Unknown', yrs:'years'
+    more:'more',unknown:'Unknown',yrs:'years'
   },
   cn:{
-    search:'搜索', example:'示例', current:'当前：', apply:'应用',
-    region:'地区', asia:'亚洲', euroAm:'欧美', others:'其他',
-    details:'详情', institution:'机构', countryRegion:'国家 / 地区',
-    coauthoredPapers:'合作论文', coauthorCount:'合作论文数',
-    yearSpan:'合作年份跨度', exploreNetwork:'🔍 搜索此学者的合作网络',
-    selectAuthor:'选择学者', setTimeRange:'📅 设定时间范围',
+    search:'搜索',example:'示例',current:'当前：',apply:'应用',
+    region:'地区',asia:'亚洲',euroAm:'欧美',others:'其他',
+    details:'详情',institution:'机构',countryRegion:'国家 / 地区',
+    coauthoredPapers:'合作论文',coauthorCount:'合作论文数',
+    yearSpan:'合作年份跨度',exploreNetwork:'🔍 搜索此学者的合作网络',
+    selectAuthor:'选择学者',setTimeRange:'📅 设定时间范围',
     generate:'生成图谱',
     title:'学术合作网络',
     subtitle:'搜索任意学者姓名以探索其合作网络<br>基于 OpenAlex 开放数据',
-    loading:'加载中…', searchingAuthor:'搜索学者中…',
-    loadingPapers:'正在加载论文 ·', loadingExample:'正在加载示例…',
-    papersLoaded:'篇已加载', collaborators:'位合作者',
-    showingTop60:'显示前 60', noMatch:'未找到匹配的合作者',
+    loading:'加载中…',searchingAuthor:'搜索学者中…',
+    loadingPapers:'正在加载论文 ·',loadingExample:'正在加载示例…',
+    papersLoaded:'篇已加载',collaborators:'位合作者',
+    showingTop60:'显示前 60',noMatch:'未找到匹配的合作者',
     collabPH:'搜索合作者姓名、机构…',
     authorPH:'输入学者姓名搜索…',
-    papers:'篇论文', cited:'被引', coauthored:'篇合作',
-    yearRange:'发表年份范围', totalPapers:'篇论文',
+    papers:'篇论文',cited:'被引',coauthored:'篇合作',
+    yearRange:'发表年份范围',totalPapers:'篇论文',
     narrowRange:'可缩窄范围以聚焦特定时期的合作关系',
-    more:'更多', unknown:'未知', yrs:'年'
+    more:'更多',unknown:'未知',yrs:'年'
   }
 };
-function t(k){ return TR[lang]?.[k]||TR.en[k]||k }
-
-function toggleLang(){
-  lang = lang==='en'?'cn':'en';
-  refreshLang();
-}
+function t(k){return TR[lang]?.[k]||TR.en[k]||k}
+function toggleLang(){lang=lang==='en'?'cn':'en';refreshLang()}
 function refreshLang(){
-  /* static UI */
-  $('btnLang').textContent = lang==='en'?'中文':'EN';
-  $('btnSearch').textContent = t('search');
-  $('btnExample').textContent = t('example');
-  $('ibCur').textContent = t('current');
-  $('btnApply').textContent = t('apply');
-  $('btnGen').textContent = t('generate');
-  $('amTitle').textContent = t('selectAuthor');
-  $('tmTitle').textContent = t('setTimeRange');
-  $('lgTitle').textContent = t('region');
-  $('si').placeholder = t('authorPH');
-  $('ci').placeholder = t('collabPH');
-  $('wcTitle').innerHTML = '🔗 '+t('title');
-  $('wcSub').innerHTML = t('subtitle');
-  /* dynamic parts */
-  if(S.co.length){ updateInfoBar(); updateLegend(); }
-  if(S.sel) showDP({id:S.sel});
+  $('btnLang').textContent=lang==='en'?'中文':'EN';
+  $('btnSearch').textContent=t('search');
+  $('btnExample').textContent=t('example');
+  $('ibCur').textContent=t('current');
+  $('btnApply').textContent=t('apply');
+  $('btnGen').textContent=t('generate');
+  $('amTitle').textContent=t('selectAuthor');
+  $('tmTitle').textContent=t('setTimeRange');
+  $('lgTitle').textContent=t('region');
+  $('si').placeholder=t('authorPH');
+  $('ci').placeholder=t('collabPH');
+  $('wcTitle').innerHTML='🔗 '+t('title');
+  $('wcSub').innerHTML=t('subtitle');
+  if(S.co.length){updateInfoBar();updateLegend()}
+  if(S.sel)showDP({id:S.sel});
 }
-
-/* ═══════════════════════════════════════
-   Region System (3 categories)
-   ═══════════════════════════════════════ */
 const ASIA=new Set('CN,JP,KR,IN,SG,TW,HK,MO,TH,VN,MY,PH,ID,PK,BD,LK,MM,KH,LA,MN,NP,BT,BN,AF,BH,GE,IR,IQ,IL,JO,KZ,KW,KG,LB,MV,KP,OM,PS,QA,SA,SY,TJ,TL,TR,TM,AE,UZ,YE,AM,AZ'.split(','));
 const EUROAM=new Set('US,CA,GB,DE,FR,IT,ES,NL,SE,NO,DK,FI,CH,AT,BE,PT,IE,PL,CZ,SK,HU,RO,BG,HR,SI,EE,LV,LT,GR,CY,MT,LU,IS,RU,UA,BY,BR,MX,AR,CL,CO,PE,VE,EC,UY,PY,BO,AL,AD,BA,XK,LI,MD,MC,ME,MK,SM,RS,VA,GT,BZ,HN,SV,NI,CR,PA,CU,JM,HT,DO,PR,TT'.split(','));
-
-function getRegion(code){
-  if(!code) return 'others';
-  const c=code.toUpperCase();
-  if(ASIA.has(c)) return 'asia';
-  if(EUROAM.has(c)) return 'euroam';
-  return 'others';
-}
+function getRegion(code){if(!code)return'others';const c=code.toUpperCase();if(ASIA.has(c))return'asia';if(EUROAM.has(c))return'euroam';return'others'}
 const RCOL={asia:'#e16f24',euroam:'#0969da',others:'#8b949e'};
-function regionName(r){ return r==='asia'?t('asia'):r==='euroam'?t('euroAm'):t('others') }
-function nodeColor(ctr){ return RCOL[getRegion(ctr)] }
-
-function updateLegend(){
-  $('lgTitle').textContent=t('region');
-  $('lbd').innerHTML=['asia','euroam','others'].map(r=>
-    `<div class="lr"><div class="ld" style="background:${RCOL[r]}"></div>${regionName(r)}</div>`
-  ).join('');
-}
-
-function updateInfoBar(){
-  const n=S.co.length;
-  $('st').textContent = n+' '+t('collaborators')+(n>60?' ('+t('showingTop60')+')':'');
-}
-
-/* ═══════════════════════════════════════
-   State & Helpers
-   ═══════════════════════════════════════ */
+function regionName(r){return r==='asia'?t('asia'):r==='euroam'?t('euroAm'):t('others')}
+function nodeColor(ctr){return RCOL[getRegion(ctr)]}
+function updateLegend(){$('lgTitle').textContent=t('region');$('lbd').innerHTML=['asia','euroam','others'].map(r=>`<div class="lr"><div class="ld" style="background:${RCOL[r]}"></div>${regionName(r)}</div>`).join('')}
+function updateInfoBar(){const n=S.co.length;$('st').textContent=n+' '+t('collaborators')+(n>60?' ('+t('showingTop60')+')':'')}
 const S={au:null,works:[],yMin:2e3,yMax:2025,sf:2e3,st:2025,co:[],sim:null,sel:null};
 const $=id=>document.getElementById(id);
 const esc=s=>{const d=document.createElement('div');d.textContent=s;return d.innerHTML};
 function safeQ(s){return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
 
-/* ═══════════════════════════════════════
-   Init
-   ═══════════════════════════════════════ */
 window.addEventListener('load',()=>{
   refreshLang();
   $('si').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch()});
@@ -333,27 +252,24 @@ window.addEventListener('load',()=>{
   $('yt').addEventListener('keydown',e=>{if(e.key==='Enter')applyYr()});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){cM('am');cM('tm');closeDP();clearCS()}});
   document.addEventListener('click',e=>{if(!$('cw').contains(e.target))$('cd').style.display='none'});
-  document.querySelectorAll('.mo').forEach(el=>{
-    el.addEventListener('click',e=>{if(e.target===el){el.classList.add('off');restoreWC()}});
-  });
-  let rt;
-  window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{if(S.co.length)render(S.au,S.co)},300)});
+  document.querySelectorAll('.mo').forEach(el=>{el.addEventListener('click',e=>{if(e.target===el){el.classList.add('off');restoreWC()}})});
+  let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{if(S.co.length)render(S.au,S.co)},300)});
   loadExample();
 });
 
-/* ═══════════════════════════════════════
-   API
-   ═══════════════════════════════════════ */
 async function searchAPI(q){
   const r=await fetch(`https://api.openalex.org/authors?search=${encodeURIComponent(q)}&per_page=10`);
-  if(!r.ok) throw new Error('API');
+  if(!r.ok)throw new Error('API');
   const d=await r.json();
-  return(d.results||[]).map(a=>({
-    id:a.id,name:a.display_name,
-    wc:a.works_count||0,cc:a.cited_by_count||0,
-    inst:a.last_known_institutions?.[0]?.display_name||'',
-    ctr:a.last_known_institutions?.[0]?.country_code||''
-  }));
+  return(d.results||[]).map(a=>({id:a.id,name:a.display_name,wc:a.works_count||0,cc:a.cited_by_count||0,inst:a.last_known_institutions?.[0]?.display_name||'',ctr:a.last_known_institutions?.[0]?.country_code||''}));
+}
+
+async function fetchAuthorByID(oid){
+  const sid=oid.replace('https://openalex.org/','');
+  const r=await fetch(`https://api.openalex.org/authors/${sid}`);
+  if(!r.ok)throw new Error('API');
+  const a=await r.json();
+  return{id:a.id,name:a.display_name,wc:a.works_count||0,cc:a.cited_by_count||0,inst:a.last_known_institutions?.[0]?.display_name||'',ctr:a.last_known_institutions?.[0]?.country_code||''};
 }
 
 async function fetchW(aid){
@@ -362,18 +278,13 @@ async function fetchW(aid){
   while(cur&&pg<12){
     const u=`https://api.openalex.org/works?filter=author.id:${sid}&per_page=200&cursor=${cur}&select=id,title,publication_year,authorships`;
     const r=await fetch(u);if(!r.ok)break;
-    const d=await r.json();
-    if(!d.results?.length)break;
-    ws=ws.concat(d.results);
-    cur=d.meta?.next_cursor||null;
-    pg++;updLD(`${t('loadingPapers')} ${ws.length} ${t('papersLoaded')}`);
+    const d=await r.json();if(!d.results?.length)break;
+    ws=ws.concat(d.results);cur=d.meta?.next_cursor||null;pg++;
+    updLD(`${t('loadingPapers')} ${ws.length} ${t('papersLoaded')}`);
   }
   return ws;
 }
 
-/* ═══════════════════════════════════════
-   Build Collaboration Map
-   ═══════════════════════════════════════ */
 function buildMap(ws,aid,yf,yt){
   const m=new Map();
   ws.forEach(w=>{
@@ -383,15 +294,8 @@ function buildMap(ws,aid,yf,yt){
     as.forEach(a=>{
       if(!a.author?.id||a.author.id===aid)return;
       const c=a.author.id;
-      if(!m.has(c))m.set(c,{
-        id:c,name:a.author.display_name||'Unknown',
-        inst:a.institutions?.[0]?.display_name||'',
-        ctr:a.institutions?.[0]?.country_code||'',
-        count:0,years:new Set(),papers:[]
-      });
-      const e=m.get(c);
-      e.count++;e.years.add(y);
-      e.papers.push({title:w.title,year:y});
+      if(!m.has(c))m.set(c,{id:c,name:a.author.display_name||'Unknown',inst:a.institutions?.[0]?.display_name||'',ctr:a.institutions?.[0]?.country_code||'',count:0,years:new Set(),papers:[]});
+      const e=m.get(c);e.count++;e.years.add(y);e.papers.push({title:w.title,year:y});
     });
   });
   const arr=Array.from(m.values());
@@ -400,45 +304,27 @@ function buildMap(ws,aid,yf,yt){
   return arr;
 }
 
-/* ═══════════════════════════════════════
-   UI Helpers
-   ═══════════════════════════════════════ */
 function showLD(m){$('lo').classList.remove('off');$('lt').textContent=m||t('loading')}
 function updLD(m){$('lt').textContent=m}
 function hideLD(){$('lo').classList.add('off')}
 function cM(id){$(id).classList.add('off');restoreWC()}
 function showM(id){$(id).classList.remove('off')}
 function restoreWC(){if(!$('ib').classList.contains('on'))$('wc').classList.remove('off')}
-
-function closeDP(){
-  $('dp').classList.remove('open');S.sel=null;
-  d3.selectAll('.ng').classed('nf',false).classed('nh',false);
-  d3.selectAll('.gl').classed('lf',false);
-}
-
+function closeDP(){$('dp').classList.remove('open');S.sel=null;d3.selectAll('.ng').classed('nf',false).classed('nh',false);d3.selectAll('.gl').classed('lf',false)}
 function closeAll(){
   if(S.sim)S.sim.stop();
   d3.select('#gs').selectAll('*').remove();
-  $('ib').classList.remove('on');
-  $('cw').classList.remove('on');
-  $('dp').classList.remove('open');
-  $('lg').classList.remove('on');
-  $('wc').classList.remove('off');
+  $('ib').classList.remove('on');$('cw').classList.remove('on');$('dp').classList.remove('open');$('lg').classList.remove('on');$('wc').classList.remove('off');
   S.au=null;S.works=[];S.co=[];S.sel=null;
 }
 
-/* ═══════════════════════════════════════
-   Search Flow
-   ═══════════════════════════════════════ */
 async function doSearch(){
   const q=$('si').value.trim();if(!q)return;
   $('wc').classList.add('off');showLD(t('searchingAuthor'));
   try{
-    const authors=await searchAPI(q);
-    hideLD();
+    const authors=await searchAPI(q);hideLD();
     if(!authors.length){$('wc').classList.remove('off');return}
-    renderAuthorList(authors);
-    showM('am');
+    renderAuthorList(authors);showM('am');
   }catch(e){hideLD();$('wc').classList.remove('off');console.error(e)}
 }
 
@@ -447,10 +333,8 @@ function renderAuthorList(authors){
   $('amTitle').textContent=t('selectAuthor');
   authors.forEach(a=>{
     const d=document.createElement('div');d.className='ai';
-    d.innerHTML=`<div class="an">${esc(a.name)}</div>
-      <div class="am">${esc(a.inst)}${a.ctr?' · '+a.ctr:''} · ${a.wc} ${t('papers')} · ${t('cited')} ${a.cc.toLocaleString()}</div>`;
-    d.onclick=()=>pickAuthor(a);
-    list.appendChild(d);
+    d.innerHTML=`<div class="an">${esc(a.name)}</div><div class="am">${esc(a.inst)}${a.ctr?' · '+a.ctr:''} · ${a.wc} ${t('papers')} · ${t('cited')} ${a.cc.toLocaleString()}</div>`;
+    d.onclick=()=>pickAuthor(a);list.appendChild(d);
   });
 }
 
@@ -460,10 +344,8 @@ async function pickAuthor(a){
   try{
     const ws=await fetchW(a.id);S.works=ws;
     const yrs=ws.map(w=>w.publication_year).filter(Boolean);
-    S.yMin=yrs.length?Math.min(...yrs):2000;
-    S.yMax=yrs.length?Math.max(...yrs):2025;
-    S.sf=S.yMin;S.st=S.yMax;
-    hideLD();
+    S.yMin=yrs.length?Math.min(...yrs):2000;S.yMax=yrs.length?Math.max(...yrs):2025;
+    S.sf=S.yMin;S.st=S.yMax;hideLD();
     $('mf').value=S.yMin;$('mt').value=S.yMax;
     $('ti').innerHTML=`<strong>${esc(a.name)}</strong><br>${t('yearRange')}: ${S.yMin} — ${S.yMax} (${ws.length} ${t('totalPapers')})<br>${t('narrowRange')}`;
     showM('tm');
@@ -471,221 +353,119 @@ async function pickAuthor(a){
 }
 
 function confirmTF(){
-  S.sf=parseInt($('mf').value)||S.yMin;
-  S.st=parseInt($('mt').value)||S.yMax;
+  S.sf=parseInt($('mf').value)||S.yMin;S.st=parseInt($('mt').value)||S.yMax;
   if(S.sf>S.st){const x=S.sf;S.sf=S.st;S.st=x}
   cM('tm');go();
 }
-
 function applyYr(){
-  S.sf=parseInt($('yf').value)||S.yMin;
-  S.st=parseInt($('yt').value)||S.yMax;
+  S.sf=parseInt($('yf').value)||S.yMin;S.st=parseInt($('yt').value)||S.yMax;
   if(S.sf>S.st){const x=S.sf;S.sf=S.st;S.st=x}
   go();
 }
 
 function go(){
   S.co=buildMap(S.works,S.au.id,S.sf,S.st);
-  $('cn').textContent=S.au.name;
-  $('yf').value=S.sf;$('yt').value=S.st;
-  updateInfoBar();
-  $('ib').classList.add('on');
-  $('cw').classList.add('on');
-  $('wc').classList.add('off');
-  $('ci').value='';$('cd').style.display='none';
-  closeDP();
-  render(S.au,S.co);
+  $('cn').textContent=S.au.name;$('yf').value=S.sf;$('yt').value=S.st;
+  updateInfoBar();$('ib').classList.add('on');$('cw').classList.add('on');$('wc').classList.add('off');
+  $('ci').value='';$('cd').style.display='none';closeDP();render(S.au,S.co);
 }
 
-/* ═══════════════════════════════════════
-   D3 Force Graph
-   ═══════════════════════════════════════ */
 function render(author,collabs){
   const svg=d3.select('#gs');svg.selectAll('*').remove();
   if(S.sim)S.sim.stop();
   const gc=$('gc'),W=gc.clientWidth,H=gc.clientHeight;
   svg.attr('viewBox',`0 0 ${W} ${H}`);
-
-  const top=collabs.slice(0,60);
-  updateLegend();
-  $('lg').classList.add('on');
-
-  const nodes=[
-    {id:author.id,name:author.name,isC:true,count:0},
-    ...top.map(c=>({id:c.id,name:c.name,isC:false,count:c.count,inst:c.inst,ctr:c.ctr}))
-  ];
+  const top=collabs.slice(0,60);updateLegend();$('lg').classList.add('on');
+  const nodes=[{id:author.id,name:author.name,isC:true,count:0},...top.map(c=>({id:c.id,name:c.name,isC:false,count:c.count,inst:c.inst,ctr:c.ctr}))];
   const links=top.map(c=>({source:author.id,target:c.id,value:c.count}));
   const mx=top.length?top[0].count:1;
   const rS=d3.scaleSqrt().domain([1,mx]).range([5,20]);
   const lS=d3.scaleLinear().domain([1,mx]).range([.8,5]);
-
   const g=svg.append('g');
   svg.call(d3.zoom().scaleExtent([.15,5]).on('zoom',e=>g.attr('transform',e.transform)));
-
-  const lnk=g.selectAll('.gl').data(links).enter().append('line')
-    .attr('class','gl').attr('stroke-width',d=>lS(d.value));
-
-  const nd=g.selectAll('.ng').data(nodes).enter().append('g')
-    .attr('class','ng').style('cursor',d=>d.isC?'default':'pointer')
-    .call(d3.drag()
-      .on('start',(e,d)=>{if(!e.active)S.sim.alphaTarget(.3).restart();d.fx=d.x;d.fy=d.y})
-      .on('drag',(e,d)=>{d.fx=e.x;d.fy=e.y})
-      .on('end',(e,d)=>{if(!e.active)S.sim.alphaTarget(0);d.fx=null;d.fy=null}));
-
-  nd.append('circle')
-    .attr('r',d=>d.isC?26:rS(d.count||1))
-    .attr('fill',d=>d.isC?'#1f2328':nodeColor(d.ctr))
-    .attr('stroke',d=>d.isC?'#fff':'rgba(255,255,255,.8)')
-    .attr('stroke-width',d=>d.isC?3:1.5)
-    .attr('opacity',d=>d.isC?1:.85);
-
-  nd.filter(d=>d.isC).append('text')
-    .attr('text-anchor','middle').attr('dy',4).attr('fill','#fff')
-    .attr('font-size','11px').attr('font-weight','600').attr('pointer-events','none')
-    .text(author.name.split(/\s+/).map(w=>w[0]).join('').slice(0,3).toUpperCase());
-
-  nd.append('text')
-    .attr('class',d=>d.isC?'ncl':'nl')
-    .attr('dy',d=>d.isC?42:rS(d.count||1)+13)
-    .text(d=>{if(d.isC)return d.name;return d.name.length>16?d.name.slice(0,14)+'…':d.name});
-
+  const lnk=g.selectAll('.gl').data(links).enter().append('line').attr('class','gl').attr('stroke-width',d=>lS(d.value));
+  const nd=g.selectAll('.ng').data(nodes).enter().append('g').attr('class','ng').style('cursor',d=>d.isC?'default':'pointer')
+    .call(d3.drag().on('start',(e,d)=>{if(!e.active)S.sim.alphaTarget(.3).restart();d.fx=d.x;d.fy=d.y}).on('drag',(e,d)=>{d.fx=e.x;d.fy=e.y}).on('end',(e,d)=>{if(!e.active)S.sim.alphaTarget(0);d.fx=null;d.fy=null}));
+  nd.append('circle').attr('r',d=>d.isC?26:rS(d.count||1)).attr('fill',d=>d.isC?'#1f2328':nodeColor(d.ctr)).attr('stroke',d=>d.isC?'#fff':'rgba(255,255,255,.8)').attr('stroke-width',d=>d.isC?3:1.5).attr('opacity',d=>d.isC?1:.85);
+  nd.filter(d=>d.isC).append('text').attr('text-anchor','middle').attr('dy',4).attr('fill','#fff').attr('font-size','11px').attr('font-weight','600').attr('pointer-events','none').text(author.name.split(/\s+/).map(w=>w[0]).join('').slice(0,3).toUpperCase());
+  nd.append('text').attr('class',d=>d.isC?'ncl':'nl').attr('dy',d=>d.isC?42:rS(d.count||1)+13).text(d=>{if(d.isC)return d.name;return d.name.length>16?d.name.slice(0,14)+'…':d.name});
   const tip=$('tp');
   nd.filter(d=>!d.isC)
-    .on('mouseover',(_,d)=>{
-      tip.style.display='block';
-      tip.textContent=`${d.name}${d.inst?' · '+d.inst:''} — ${d.count} ${t('coauthored')}`;
-    })
-    .on('mousemove',e=>{
-      const r=gc.getBoundingClientRect();
-      tip.style.left=(e.clientX-r.left+14)+'px';
-      tip.style.top=(e.clientY-r.top-10)+'px';
-    })
+    .on('mouseover',(_,d)=>{tip.style.display='block';tip.textContent=`${d.name}${d.inst?' · '+d.inst:''} — ${d.count} ${t('coauthored')}`})
+    .on('mousemove',e=>{const r=gc.getBoundingClientRect();tip.style.left=(e.clientX-r.left+14)+'px';tip.style.top=(e.clientY-r.top-10)+'px'})
     .on('mouseout',()=>{tip.style.display='none'})
     .on('click',(e,d)=>{e.stopPropagation();showDP(d)});
-
   svg.on('click',()=>closeDP());
-
   S.sim=d3.forceSimulation(nodes)
     .force('link',d3.forceLink(links).id(d=>d.id).distance(d=>80+50/(d.value||1)))
     .force('charge',d3.forceManyBody().strength(-180))
     .force('center',d3.forceCenter(W/2,H/2))
     .force('collision',d3.forceCollide().radius(d=>(d.isC?30:rS(d.count||1))+6))
-    .on('tick',()=>{
-      lnk.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y)
-          .attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
-      nd.attr('transform',d=>`translate(${d.x},${d.y})`);
-    });
+    .on('tick',()=>{lnk.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y).attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);nd.attr('transform',d=>`translate(${d.x},${d.y})`)});
 }
 
-/* ═══════════════════════════════════════
-   Detail Panel
-   ═══════════════════════════════════════ */
 function showDP(nd){
   const c=S.co.find(x=>x.id===nd.id);if(!c)return;
   S.sel=nd.id;
   const gid=d=>typeof d==='object'?d.id:d;
   d3.selectAll('.ng').classed('nf',d=>!d.isC&&d.id!==nd.id).classed('nh',d=>d.id===nd.id);
   d3.selectAll('.gl').classed('lf',d=>gid(d.target)!==nd.id&&gid(d.source)!==nd.id);
-
   $('dt').textContent=c.name;
   const rn=regionName(getRegion(c.ctr));
   let h='';
-  /* ── Explore button ── */
-  h+=`<button class="sa" onclick="exploreAuthor('${safeQ(c.name)}')">${t('exploreNetwork')}</button>`;
-  if(c.inst) h+=`<div class="df"><div class="dl">${t('institution')}</div><div class="dv">${esc(c.inst)}</div></div>`;
-  if(c.ctr) h+=`<div class="df"><div class="dl">${t('countryRegion')}</div><div class="dv">${c.ctr} · ${rn}</div></div>`;
+  h+=`<button class="sa" onclick="exploreAuthor('${safeQ(c.id)}','${safeQ(c.name)}')">${t('exploreNetwork')}</button>`;
+  if(c.inst)h+=`<div class="df"><div class="dl">${t('institution')}</div><div class="dv">${esc(c.inst)}</div></div>`;
+  if(c.ctr)h+=`<div class="df"><div class="dl">${t('countryRegion')}</div><div class="dv">${c.ctr} · ${rn}</div></div>`;
   h+=`<div class="df"><div class="dl">${t('coauthorCount')}</div><div class="dv">${c.count}</div></div>`;
   h+=`<div class="df"><div class="dl">${t('yearSpan')}</div><div class="dv">${c.years[0]} — ${c.years[c.years.length-1]} (${c.years.length} ${t('yrs')})</div></div>`;
   h+=`<div class="df"><div class="dl">${t('coauthoredPapers')}</div><ul class="pl">`;
-  c.papers.sort((a,b)=>(b.year||0)-(a.year||0)).slice(0,30).forEach(p=>{
-    h+=`<li><span class="yt">${p.year||'?'}</span>${esc(p.title||'Untitled')}</li>`;
-  });
-  if(c.papers.length>30) h+=`<li style="color:var(--text2)">… ${c.papers.length-30} ${t('more')}</li>`;
+  c.papers.sort((a,b)=>(b.year||0)-(a.year||0)).slice(0,30).forEach(p=>{h+=`<li><span class="yt">${p.year||'?'}</span>${esc(p.title||'Untitled')}</li>`});
+  if(c.papers.length>30)h+=`<li style="color:var(--text2)">… ${c.papers.length-30} ${t('more')}</li>`;
   h+='</ul></div>';
-  $('db').innerHTML=h;
-  $('dp').classList.add('open');
+  $('db').innerHTML=h;$('dp').classList.add('open');
 }
 
-/* ═══════════════════════════════════════
-   Explore Author (navigate from detail)
-   ═══════════════════════════════════════ */
-function exploreAuthor(name){
-  closeDP();
-  $('si').value=name;
-  doSearch();
+async function exploreAuthor(oid,name){
+  closeDP();$('si').value=name;
+  $('wc').classList.add('off');showLD(`${t('loadingPapers')} ${name}…`);
+  try{
+    const a=await fetchAuthorByID(oid);
+    S.au=a;
+    const ws=await fetchW(a.id);S.works=ws;
+    const yrs=ws.map(w=>w.publication_year).filter(Boolean);
+    S.yMin=yrs.length?Math.min(...yrs):2000;S.yMax=yrs.length?Math.max(...yrs):2025;
+    S.sf=S.yMin;S.st=S.yMax;
+    hideLD();go();
+  }catch(e){hideLD();$('wc').classList.remove('off');console.error(e)}
 }
 
-/* ═══════════════════════════════════════
-   Collaborator Search
-   ═══════════════════════════════════════ */
 function onCS(){
-  const kw=$('ci').value.trim().toLowerCase();
-  const dd=$('cd');
-  if(!kw){
-    dd.style.display='none';
-    d3.selectAll('.ng').classed('nf',false).classed('nh',false);
-    d3.selectAll('.gl').classed('lf',false);
-    return;
-  }
-  const ms=S.co.filter(c=>
-    c.name.toLowerCase().includes(kw)||
-    c.inst?.toLowerCase().includes(kw)||
-    c.ctr?.toLowerCase().includes(kw)||
-    regionName(getRegion(c.ctr)).toLowerCase().includes(kw)
-  ).slice(0,12);
-
-  if(!ms.length){
-    dd.innerHTML=`<div style="padding:12px;color:var(--text2);font-size:13px">${t('noMatch')}</div>`;
-    dd.style.display='block';return;
-  }
+  const kw=$('ci').value.trim().toLowerCase();const dd=$('cd');
+  if(!kw){dd.style.display='none';d3.selectAll('.ng').classed('nf',false).classed('nh',false);d3.selectAll('.gl').classed('lf',false);return}
+  const ms=S.co.filter(c=>c.name.toLowerCase().includes(kw)||c.inst?.toLowerCase().includes(kw)||c.ctr?.toLowerCase().includes(kw)||regionName(getRegion(c.ctr)).toLowerCase().includes(kw)).slice(0,12);
+  if(!ms.length){dd.innerHTML=`<div style="padding:12px;color:var(--text2);font-size:13px">${t('noMatch')}</div>`;dd.style.display='block';return}
   dd.innerHTML='';
-  ms.forEach(m=>{
-    const d=document.createElement('div');d.className='di';
-    d.innerHTML=`<div class="dn">${esc(m.name)}</div><div class="dm">${esc(m.inst||t('unknown'))} · ${m.count} ${t('coauthored')}</div>`;
-    d.onclick=()=>{dd.style.display='none';$('ci').value=m.name;hlN(m.id);showDP({id:m.id})};
-    dd.appendChild(d);
-  });
+  ms.forEach(m=>{const d=document.createElement('div');d.className='di';d.innerHTML=`<div class="dn">${esc(m.name)}</div><div class="dm">${esc(m.inst||t('unknown'))} · ${m.count} ${t('coauthored')}</div>`;d.onclick=()=>{dd.style.display='none';$('ci').value=m.name;hlN(m.id);showDP({id:m.id})};dd.appendChild(d)});
   dd.style.display='block';
-
-  const ids=new Set(ms.map(m=>m.id));
-  const gid=d=>typeof d==='object'?d.id:d;
+  const ids=new Set(ms.map(m=>m.id));const gid=d=>typeof d==='object'?d.id:d;
   d3.selectAll('.ng').classed('nf',d=>!d.isC&&!ids.has(d.id)).classed('nh',d=>ids.has(d.id));
   d3.selectAll('.gl').classed('lf',d=>!ids.has(gid(d.target))&&!ids.has(gid(d.source)));
 }
+function hlN(nid){const gid=d=>typeof d==='object'?d.id:d;d3.selectAll('.ng').classed('nf',d=>!d.isC&&d.id!==nid).classed('nh',d=>d.id===nid);d3.selectAll('.gl').classed('lf',d=>gid(d.target)!==nid&&gid(d.source)!==nid)}
+function clearCS(){$('ci').value='';$('cd').style.display='none';d3.selectAll('.ng').classed('nf',false).classed('nh',false);d3.selectAll('.gl').classed('lf',false)}
 
-function hlN(nid){
-  const gid=d=>typeof d==='object'?d.id:d;
-  d3.selectAll('.ng').classed('nf',d=>!d.isC&&d.id!==nid).classed('nh',d=>d.id===nid);
-  d3.selectAll('.gl').classed('lf',d=>gid(d.target)!==nid&&gid(d.source)!==nid);
-}
-
-function clearCS(){
-  $('ci').value='';$('cd').style.display='none';
-  d3.selectAll('.ng').classed('nf',false).classed('nh',false);
-  d3.selectAll('.gl').classed('lf',false);
-}
-
-/* ═══════════════════════════════════════
-   Fixed Example: Jingyu He
-   ═══════════════════════════════════════ */
 async function loadExample(){
-  $('si').value='Jingyu He';
-  $('wc').classList.add('off');
-  showLD(t('loadingExample'));
+  $('si').value='Jingyu He';$('wc').classList.add('off');showLD(t('loadingExample'));
   try{
     const authors=await searchAPI('jingyu he');
     if(!authors.length){hideLD();$('wc').classList.remove('off');return}
-    /* pick the one closest to ~13 works / ~58 citations */
     authors.sort((a,b)=>(Math.abs(a.wc-13)+Math.abs(a.cc-58))-(Math.abs(b.wc-13)+Math.abs(b.cc-58)));
-    const a=authors[0];
-    S.au=a;
+    const a=authors[0];S.au=a;
     updLD(`${t('loadingPapers')} ${a.name}…`);
     const ws=await fetchW(a.id);S.works=ws;
     const yrs=ws.map(w=>w.publication_year).filter(Boolean);
-    S.yMin=yrs.length?Math.min(...yrs):2000;
-    S.yMax=yrs.length?Math.max(...yrs):2025;
-    S.sf=S.yMin;S.st=S.yMax;
-    hideLD();go();
+    S.yMin=yrs.length?Math.min(...yrs):2000;S.yMax=yrs.length?Math.max(...yrs):2025;
+    S.sf=S.yMin;S.st=S.yMax;hideLD();go();
   }catch(e){hideLD();$('wc').classList.remove('off');console.error(e)}
 }
 </script>
