@@ -2,437 +2,692 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Author Linker2</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Academic Collaboration Network</title>
 <script src="https://d3js.org/d3.v7.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Segoe UI',Arial,sans-serif;background:#0f1117;overflow:hidden;height:100vh;color:#e0e0e0}
-.topbar{background:#1a1d27;padding:10px 20px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 8px rgba(0,0,0,.4);z-index:10;position:relative}
-.topbar h1{font-size:1em;color:#7c8cf8;white-space:nowrap}
-.topbar input{flex:1;padding:7px 16px;border:2px solid #2d3040;border-radius:20px;font-size:.9em;outline:none;background:#12141c;color:#e0e0e0}
-.topbar input:focus{border-color:#7c8cf8}
-.topbar button{padding:7px 18px;background:#7c8cf8;color:#fff;border:none;border-radius:20px;cursor:pointer;font-weight:600;font-size:.9em}
-.topbar button:disabled{background:#444;cursor:not-allowed}
-.status{font-size:.75em;color:#888;white-space:nowrap;max-width:340px;overflow:hidden;text-overflow:ellipsis}
-.main{display:flex;height:calc(100vh - 52px)}
-.graph-area{position:relative;flex:1;overflow:hidden}
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:none;justify-content:center;align-items:center}
-.modal-overlay.on{display:flex}
-.modal-box{background:#1a1d27;border-radius:14px;padding:20px;max-width:560px;width:92%;max-height:70vh;overflow-y:auto;border:1px solid #2d3040}
-.modal-box h3{color:#e8e8e8;margin-bottom:12px;font-size:.95em}
-.modal-box .xbtn{float:right;background:none;border:none;color:#666;font-size:1.1em;cursor:pointer}
-.acard{padding:12px 14px;border:1px solid #2d3040;border-radius:8px;margin-bottom:6px;cursor:pointer;transition:.12s}
-.acard:hover{border-color:#7c8cf8;background:rgba(124,140,248,.06)}
-.acard .n{font-weight:600;color:#e8e8e8;font-size:.9em}
-.acard .i{color:#aaa;font-size:.78em;margin-top:2px}
-.acard .s{color:#666;font-size:.72em;margin-top:2px}
-.panel{width:360px;background:#1a1d27;border-left:1px solid #2d3040;padding:20px;overflow-y:auto;flex-shrink:0;display:none}
-.panel.on{display:block}
-.panel h2{font-size:.95em;color:#e8e8e8;margin-bottom:4px}
-.panel .pm{font-size:.78em;color:#888;margin-bottom:6px}
-.panel .bd{display:inline-block;font-size:.7em;padding:2px 8px;border-radius:10px;margin-right:4px}
-.panel a{color:#7c8cf8;text-decoration:none;font-size:.82em}
-.panel .sec{margin-top:10px;border-top:1px solid #2d3040;padding-top:10px}
-.panel .sec h4{font-size:.8em;color:#aaa;margin-bottom:6px}
-.panel .inst-row{font-size:.78em;color:#bbb;margin-top:6px;padding:6px 10px;background:rgba(124,140,248,.05);border-radius:6px;border:1px solid #2d3040}
-.panel .inst-row .lbl{color:#666;font-size:.7em;text-transform:uppercase;letter-spacing:.5px}
-.panel .inst-row .val{color:#e8e8e8;margin-top:2px}
-.panel .inst-row .sub{color:#777;font-size:.72em;margin-top:1px}
-.crow{font-size:.78em;color:#bbb;padding:4px 0;display:flex;justify-content:space-between;border-bottom:1px solid rgba(45,48,64,.4)}
-.crow:last-child{border-bottom:none}
-.crow .yr{color:#7c8cf8;font-weight:600;margin-left:8px;white-space:nowrap}
-.rbtn{display:inline-block;margin-top:8px;padding:6px 16px;background:rgba(124,140,248,.12);color:#7c8cf8;border:1px solid rgba(124,140,248,.3);border-radius:16px;cursor:pointer;font-size:.78em;font-weight:600;transition:.15s}
-.rbtn:hover{background:rgba(124,140,248,.25)}
-.legend{position:absolute;bottom:16px;left:16px;background:rgba(26,29,39,.95);border-radius:10px;padding:10px 14px;font-size:.72em;color:#999;border:1px solid #2d3040;display:none}
-.legend .r{display:flex;align-items:center;gap:6px;margin:3px 0}
-.legend .d{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-.tooltip{position:absolute;background:rgba(20,22,30,.96);color:#e0e0e0;padding:8px 14px;border-radius:8px;font-size:.77em;max-width:340px;pointer-events:none;z-index:100;line-height:1.5;border:1px solid #2d3040;display:none}
-.hint{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#555;font-size:1em;text-align:center;line-height:2}
-.loader{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;display:none;z-index:20}
-.loader.on{display:block}
-.spinner{width:32px;height:32px;border:3px solid #2d3040;border-top-color:#7c8cf8;border-radius:50%;animation:sp .6s linear infinite;margin:0 auto 10px}
-@keyframes sp{to{transform:rotate(360deg)}}
-.loader span{font-size:.82em;color:#888}
-.mini-spin{display:inline-block;width:12px;height:12px;border:2px solid #2d3040;border-top-color:#7c8cf8;border-radius:50%;animation:sp .6s linear infinite;vertical-align:middle;margin-right:6px}
-.hist-item{padding:4px 0;border-bottom:1px solid rgba(45,48,64,.3)}
-.hist-item:last-child{border-bottom:none}
-.hist-item a{color:#7c8cf8;font-size:.78em;cursor:pointer;text-decoration:none}
-.hist-item a:hover{text-decoration:underline}
+:root{
+  --bg:#f6f8fa;--card:#ffffff;--border:#d0d7de;
+  --text:#1f2328;--text2:#656d76;--accent:#0969da;
+  --green:#1a7f37;--radius:8px;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text)}
+#app{
+  max-width:1100px;margin:16px auto;border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;background:var(--card);
+  box-shadow:0 1px 3px rgba(0,0,0,.04);
+}
+
+/* ── Header ── */
+#hd{display:flex;align-items:center;gap:8px;padding:10px 16px;border-bottom:1px solid var(--border);background:var(--bg);flex-wrap:wrap}
+#hd input{padding:5px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;outline:none;width:220px;background:var(--card)}
+#hd input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(9,105,218,.12)}
+#hd button{padding:5px 14px;border-radius:6px;font-size:14px;cursor:pointer;border:1px solid var(--border);background:var(--bg);color:var(--text)}
+#hd button:hover{background:#eaeef2}
+.bp{background:var(--green)!important;color:#fff!important;border-color:var(--green)!important}
+.bp:hover{background:#15692e!important}
+.langb{font-size:12px;padding:4px 10px!important;min-width:40px;font-weight:600;letter-spacing:.3px}
+
+/* ── Info bar ── */
+#ib{display:none;padding:8px 16px;border-bottom:1px solid var(--border);font-size:13px;color:var(--text2);align-items:center;gap:10px;flex-wrap:wrap;background:var(--card)}
+#ib.on{display:flex}
+.badge{background:#ddf4ff;color:var(--accent);padding:2px 10px;border-radius:12px;font-weight:600}
+.yg{display:flex;align-items:center;gap:4px}
+.yg input{width:64px;padding:2px 6px;border:1px solid var(--border);border-radius:4px;font-size:13px;text-align:center}
+.yg .yb{padding:2px 10px;font-size:12px;cursor:pointer;border:1px solid var(--border);border-radius:4px;background:var(--bg)}
+.yg .yb:hover{background:#eaeef2}
+#st{margin-left:auto;white-space:nowrap}
+
+/* ── Collab search ── */
+#cw{position:relative;z-index:8;display:none;border-bottom:1px solid var(--border);background:var(--card)}
+#cw.on{display:block}
+#cb{display:flex;align-items:center;gap:8px;padding:8px 16px}
+#ci{flex:1;padding:5px 12px;border:1px solid var(--border);border-radius:6px;font-size:14px;outline:none}
+#ci:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(9,105,218,.12)}
+#cd{position:absolute;left:16px;right:16px;top:100%;background:var(--card);border:1px solid var(--border);border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.08);max-height:220px;overflow-y:auto;z-index:60;display:none}
+.di{padding:8px 12px;cursor:pointer;font-size:13px}.di:hover{background:var(--bg)}
+.di .dn{font-weight:600;color:var(--accent)}.di .dm{color:var(--text2);font-size:12px;margin-top:1px}
+
+/* ── Graph container ── */
+#gc{position:relative;width:100%;height:560px;background:var(--card)}
+#gs{width:100%;height:100%;display:block}
+
+/* ── Legend ── */
+#lg{position:absolute;bottom:12px;left:12px;background:rgba(255,255,255,.92);border:1px solid var(--border);border-radius:6px;padding:8px 12px;font-size:12px;color:var(--text2);display:none}
+#lg.on{display:block}
+#lg h5{font-size:11px;margin-bottom:4px;color:var(--text);font-weight:600}
+.lr{display:flex;align-items:center;gap:6px;margin:3px 0}
+.ld{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* ── Detail panel ── */
+#dp{position:absolute;top:0;right:0;width:320px;height:100%;background:var(--card);border-left:1px solid var(--border);box-shadow:-2px 0 8px rgba(0,0,0,.04);transform:translateX(100%);transition:transform .25s ease;z-index:50;overflow-y:auto}
+#dp.open{transform:translateX(0)}
+.ph{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--card);z-index:1}
+.ph h4{font-size:15px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;margin-right:8px}
+.pb{padding:16px}
+.df{margin-bottom:14px}.df .dl{font-size:12px;color:var(--text2);margin-bottom:2px}.df .dv{font-size:14px;font-weight:500}
+.pl{list-style:none}.pl li{padding:6px 0;border-bottom:1px solid #f0f2f5;font-size:13px;line-height:1.4}
+.yt{display:inline-block;background:#ddf4ff;color:var(--accent);padding:1px 6px;border-radius:4px;font-size:11px;margin-right:4px}
+
+/* ── Explore button ── */
+.sa{display:block;width:100%;padding:9px 12px;background:var(--accent);color:#fff;border:none;border-radius:6px;font-size:13px;cursor:pointer;text-align:center;margin-bottom:16px;font-weight:500;transition:background .15s}
+.sa:hover{background:#0550ae}
+
+/* ── Tooltip ── */
+.tp{position:absolute;background:#1f2328;color:#fff;padding:6px 10px;border-radius:6px;font-size:12px;pointer-events:none;z-index:300;white-space:nowrap;display:none;max-width:340px;overflow:hidden;text-overflow:ellipsis}
+
+/* ── Loading ── */
+#lo{position:absolute;inset:0;background:rgba(255,255,255,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100}
+#lo.off{display:none}
+.sp{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:rot .7s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+#lo .lt{margin-top:12px;color:var(--text2);font-size:14px}
+
+/* ── Welcome ── */
+#wc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--card);z-index:10}
+#wc.off{display:none}
+#wc h2{font-size:22px;margin-bottom:6px}
+#wc p{color:var(--text2);font-size:14px;text-align:center;padding:0 20px;line-height:1.6}
+
+/* ── Modal ── */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.22);display:flex;align-items:center;justify-content:center;z-index:200}
+.mo.off{display:none}
+.mx{background:var(--card);border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.12);width:92%;max-width:480px;max-height:75vh;overflow:auto}
+.mh{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.mh h3{font-size:16px;font-weight:600}
+.md{padding:8px 20px 16px}
+
+/* ── Close btn ── */
+.xb{background:none;border:none;font-size:18px;color:var(--text2);cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:6px;flex-shrink:0}
+.xb:hover{background:#f3f4f6;color:var(--text)}
+
+/* ── Author item ── */
+.ai{padding:10px 12px;border-radius:6px;cursor:pointer;border:1px solid transparent;margin-bottom:2px}
+.ai:hover{background:var(--bg);border-color:var(--border)}
+.ai .an{font-weight:600;color:var(--accent)}.ai .am{font-size:12px;color:var(--text2);margin-top:2px}
+
+/* ── Time filter ── */
+.tf{padding:24px 20px;text-align:center}
+.tf .th{font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.7;white-space:pre-line}
+.tf .tr{display:flex;align-items:center;justify-content:center;gap:12px;margin:16px 0}
+.tf input[type="number"]{width:100px;padding:8px;border:1px solid var(--border);border-radius:6px;font-size:16px;text-align:center}
+.tf input[type="number"]:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(9,105,218,.12);outline:none}
+.tf button{padding:8px 28px;background:var(--green);color:#fff;border:none;border-radius:6px;font-size:14px;cursor:pointer;font-weight:500}
+.tf button:hover{background:#15692e}
+
+/* ── D3 graph ── */
+.nl{font-size:10px;fill:var(--text2);pointer-events:none;text-anchor:middle}
+.ncl{font-size:12px;fill:var(--text);font-weight:700;pointer-events:none;text-anchor:middle}
+.gl{stroke:#d0d7de;stroke-opacity:.45}
+.nf{opacity:.1}.lf{opacity:.03}
+.nh circle{stroke:#cf222e!important;stroke-width:3px!important}
+
+@media(max-width:700px){
+  #dp{width:100%}
+  #hd input{width:130px}
+  .tf input[type="number"]{width:80px}
+  #gc{height:420px}
+}
 </style>
 </head>
 <body>
 
-<div class="topbar">
-<h1>🧑‍🔬 Author Linker2</h1>
-<input id="inp" placeholder="Enter researcher name…">
-<button id="btn">Search</button>
-<span class="status" id="st"></span>
+<div id="app">
+  <!-- Header -->
+  <div id="hd">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#656d76" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="si" placeholder="Search author name...">
+    <button class="bp" onclick="doSearch()" id="btnSearch">Search</button>
+    <span style="flex:1"></span>
+    <button onclick="loadExample()" id="btnExample">Example</button>
+    <button onclick="toggleLang()" id="btnLang" class="langb">中文</button>
+  </div>
+
+  <!-- Info bar -->
+  <div id="ib">
+    <span id="ibCur">Current:</span>
+    <span class="badge" id="cn"></span>
+    <div class="yg">📅
+      <input type="number" id="yf" min="1900" max="2030">
+      <span>—</span>
+      <input type="number" id="yt" min="1900" max="2030">
+      <button class="yb" onclick="applyYr()" id="btnApply">Apply</button>
+    </div>
+    <span id="st"></span>
+    <button class="xb" onclick="closeAll()" title="Close">✕</button>
+  </div>
+
+  <!-- Collab search -->
+  <div id="cw">
+    <div id="cb">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#656d76" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="ci" placeholder="Search collaborators by name, institution...">
+      <button class="xb" onclick="clearCS()" title="Clear">✕</button>
+    </div>
+    <div id="cd"></div>
+  </div>
+
+  <!-- Graph -->
+  <div id="gc">
+    <svg id="gs"></svg>
+    <div id="lg"><h5 id="lgTitle">Region</h5><div id="lbd"></div></div>
+    <div id="dp">
+      <div class="ph"><h4 id="dt">Details</h4><button class="xb" onclick="closeDP()">✕</button></div>
+      <div class="pb" id="db"></div>
+    </div>
+    <div class="tp" id="tp"></div>
+    <div id="lo" class="off"><div class="sp"></div><div class="lt" id="lt">Loading...</div></div>
+    <div id="wc">
+      <h2 id="wcTitle">🔗 Academic Collaboration Network</h2>
+      <p id="wcSub">Search any author name to explore collaboration networks<br>Powered by OpenAlex open data</p>
+    </div>
+  </div>
 </div>
 
-<div class="modal-overlay" id="mo"><div class="modal-box"><button class="xbtn" id="mx">✕</button><h3 id="mt"></h3><div id="al"></div></div></div>
-
-<div class="main">
-<div class="graph-area">
-<svg id="svg"></svg>
-<div class="hint" id="hint">Author Linker2<br><span style="font-size:.8em;color:#444">Search a researcher → select → view collaboration network</span></div>
-<div class="loader" id="ld"><div class="spinner"></div><span id="lt"></span></div>
-<div class="legend" id="lg">
-<div style="margin-bottom:4px"><strong>Region</strong></div>
-<div class="r"><div class="d" style="background:#f87171"></div>Asia</div>
-<div class="r"><div class="d" style="background:#60a5fa"></div>Europe & Americas</div>
-<div class="r"><div class="d" style="background:#a78bfa"></div>Other / Unknown</div>
-<div style="margin-top:6px"><strong>Node size</strong> = Co-authored papers</div>
-<div id="cov" style="margin-top:4px;color:#666"></div>
-</div>
-</div>
-<div class="panel" id="pn">
-<h2 id="pName"></h2>
-<div class="pm" id="pMeta"></div>
-<div id="pBadge"></div>
-<div id="pInst" class="inst-row" style="display:none"><div class="lbl">Latest Institution (via OpenAlex)</div><div class="val" id="pInstName">—</div><div class="sub" id="pInstSub"></div></div>
-<div id="pActions" style="margin-top:10px"></div>
-<div class="sec" id="pHist" style="display:none"><h4>🕘 Search History</h4><div id="pHistList"></div></div>
-<div class="sec" id="pSec"><h4>Co-authored Works</h4><div id="pWorks"></div></div>
-</div>
+<!-- Author modal -->
+<div class="mo off" id="am">
+  <div class="mx">
+    <div class="mh"><h3 id="amTitle">Select Author</h3><button class="xb" onclick="cM('am')">✕</button></div>
+    <div class="md" id="al"></div>
+  </div>
 </div>
 
-<div class="tooltip" id="tp"></div>
+<!-- Time modal -->
+<div class="mo off" id="tm">
+  <div class="mx">
+    <div class="mh"><h3 id="tmTitle">📅 Set Time Range</h3><button class="xb" onclick="cM('tm')">✕</button></div>
+    <div class="tf">
+      <p class="th" id="ti"></p>
+      <div class="tr">
+        <input type="number" id="mf" min="1900" max="2030">
+        <span style="font-size:20px;color:var(--text2)">—</span>
+        <input type="number" id="mt" min="1900" max="2030">
+      </div>
+      <button onclick="confirmTF()" id="btnGen">Generate Graph</button>
+    </div>
+  </div>
+</div>
 
 <script>
-/* ═══ CONFIG ═══ */
-const CFG={API:'https://api.openalex.org',MAIL:'mailto=authorlinker2@example.com',MAX_WORKS:2000,MAX_CO:80,BATCH:25,PP:200,RETRY:3};
+/* ═══════════════════════════════════════
+   Language System
+   ═══════════════════════════════════════ */
+let lang='en';
+const TR={
+  en:{
+    search:'Search', example:'Example', current:'Current:', apply:'Apply',
+    region:'Region', asia:'Asia', euroAm:'Europe & Americas', others:'Others',
+    details:'Details', institution:'Institution', countryRegion:'Country / Region',
+    coauthoredPapers:'Co-authored Papers', coauthorCount:'Co-authored Papers',
+    yearSpan:'Year Span', exploreNetwork:'🔍 Explore this author\'s network',
+    selectAuthor:'Select Author', setTimeRange:'📅 Set Time Range',
+    generate:'Generate Graph',
+    title:'Academic Collaboration Network',
+    subtitle:'Search any author name to explore collaboration networks<br>Powered by OpenAlex open data',
+    loading:'Loading…', searchingAuthor:'Searching authors…',
+    loadingPapers:'Loading papers for', loadingExample:'Loading example…',
+    papersLoaded:'papers loaded', collaborators:'collaborators',
+    showingTop60:'showing top 60', noMatch:'No matching collaborators found',
+    collabPH:'Search collaborators by name, institution…',
+    authorPH:'Search author name…',
+    papers:'papers', cited:'cited by', coauthored:'co-authored',
+    yearRange:'Year range', totalPapers:'papers total',
+    narrowRange:'You may narrow the range to focus on specific periods',
+    more:'more', unknown:'Unknown', yrs:'years'
+  },
+  cn:{
+    search:'搜索', example:'示例', current:'当前：', apply:'应用',
+    region:'地区', asia:'亚洲', euroAm:'欧美', others:'其他',
+    details:'详情', institution:'机构', countryRegion:'国家 / 地区',
+    coauthoredPapers:'合作论文', coauthorCount:'合作论文数',
+    yearSpan:'合作年份跨度', exploreNetwork:'🔍 搜索此学者的合作网络',
+    selectAuthor:'选择学者', setTimeRange:'📅 设定时间范围',
+    generate:'生成图谱',
+    title:'学术合作网络',
+    subtitle:'搜索任意学者姓名以探索其合作网络<br>基于 OpenAlex 开放数据',
+    loading:'加载中…', searchingAuthor:'搜索学者中…',
+    loadingPapers:'正在加载论文 ·', loadingExample:'正在加载示例…',
+    papersLoaded:'篇已加载', collaborators:'位合作者',
+    showingTop60:'显示前 60', noMatch:'未找到匹配的合作者',
+    collabPH:'搜索合作者姓名、机构…',
+    authorPH:'输入学者姓名搜索…',
+    papers:'篇论文', cited:'被引', coauthored:'篇合作',
+    yearRange:'发表年份范围', totalPapers:'篇论文',
+    narrowRange:'可缩窄范围以聚焦特定时期的合作关系',
+    more:'更多', unknown:'未知', yrs:'年'
+  }
+};
+function t(k){ return TR[lang]?.[k]||TR.en[k]||k }
 
-/* ═══ REGION ═══ */
-const ASIA=new Set('CN JP KR TW HK MO SG IN TH VN MY PH ID BD PK LK NP MM KH LA MN BN KZ UZ KG TJ TM AF IQ IR SA AE IL TR QA KW BH OM YE JO LB SY PS'.split(' '));
-const EUAM=new Set('US GB DE FR CA AU NZ IT ES NL BE CH AT SE NO DK FI IE PT PL CZ SK HU RO BG HR SI RS GR UA RU LT LV EE IS LU MT CY MX BR AR CL CO PE VE EC UY PY BO CR PA DO GT HN SV NI CU JM TT PR'.split(' '));
-const COL={asia:'#f87171',euam:'#60a5fa',other:'#a78bfa'};
-const LBL={asia:'Asia',euam:'Europe & Americas',other:'Other / Unknown'};
-function toRegion(cc){if(!cc)return'other';cc=cc.toUpperCase();return ASIA.has(cc)?'asia':EUAM.has(cc)?'euam':'other'}
-function majority(arr){if(!arr.length)return'';const f={};for(const v of arr)f[v]=(f[v]||0)+1;let b='',m=0;for(const k in f)if(f[k]>m){m=f[k];b=k}return b}
+function toggleLang(){
+  lang = lang==='en'?'cn':'en';
+  refreshLang();
+}
+function refreshLang(){
+  /* static UI */
+  $('btnLang').textContent = lang==='en'?'中文':'EN';
+  $('btnSearch').textContent = t('search');
+  $('btnExample').textContent = t('example');
+  $('ibCur').textContent = t('current');
+  $('btnApply').textContent = t('apply');
+  $('btnGen').textContent = t('generate');
+  $('amTitle').textContent = t('selectAuthor');
+  $('tmTitle').textContent = t('setTimeRange');
+  $('lgTitle').textContent = t('region');
+  $('si').placeholder = t('authorPH');
+  $('ci').placeholder = t('collabPH');
+  $('wcTitle').innerHTML = '🔗 '+t('title');
+  $('wcSub').innerHTML = t('subtitle');
+  /* dynamic parts */
+  if(S.co.length){ updateInfoBar(); updateLegend(); }
+  if(S.sel) showDP({id:S.sel});
+}
 
-/* ═══ UTIL ═══ */
-const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+/* ═══════════════════════════════════════
+   Region System (3 categories)
+   ═══════════════════════════════════════ */
+const ASIA=new Set('CN,JP,KR,IN,SG,TW,HK,MO,TH,VN,MY,PH,ID,PK,BD,LK,MM,KH,LA,MN,NP,BT,BN,AF,BH,GE,IR,IQ,IL,JO,KZ,KW,KG,LB,MV,KP,OM,PS,QA,SA,SY,TJ,TL,TR,TM,AE,UZ,YE,AM,AZ'.split(','));
+const EUROAM=new Set('US,CA,GB,DE,FR,IT,ES,NL,SE,NO,DK,FI,CH,AT,BE,PT,IE,PL,CZ,SK,HU,RO,BG,HR,SI,EE,LV,LT,GR,CY,MT,LU,IS,RU,UA,BY,BR,MX,AR,CL,CO,PE,VE,EC,UY,PY,BO,AL,AD,BA,XK,LI,MD,MC,ME,MK,SM,RS,VA,GT,BZ,HN,SV,NI,CR,PA,CU,JM,HT,DO,PR,TT'.split(','));
+
+function getRegion(code){
+  if(!code) return 'others';
+  const c=code.toUpperCase();
+  if(ASIA.has(c)) return 'asia';
+  if(EUROAM.has(c)) return 'euroam';
+  return 'others';
+}
+const RCOL={asia:'#e16f24',euroam:'#0969da',others:'#8b949e'};
+function regionName(r){ return r==='asia'?t('asia'):r==='euroam'?t('euroAm'):t('others') }
+function nodeColor(ctr){ return RCOL[getRegion(ctr)] }
+
+function updateLegend(){
+  $('lgTitle').textContent=t('region');
+  $('lbd').innerHTML=['asia','euroam','others'].map(r=>
+    `<div class="lr"><div class="ld" style="background:${RCOL[r]}"></div>${regionName(r)}</div>`
+  ).join('');
+}
+
+function updateInfoBar(){
+  const n=S.co.length;
+  $('st').textContent = n+' '+t('collaborators')+(n>60?' ('+t('showingTop60')+')':'');
+}
+
+/* ═══════════════════════════════════════
+   State & Helpers
+   ═══════════════════════════════════════ */
+const S={au:null,works:[],yMin:2e3,yMax:2025,sf:2e3,st:2025,co:[],sim:null,sel:null};
 const $=id=>document.getElementById(id);
+const esc=s=>{const d=document.createElement('div');d.textContent=s;return d.innerHTML};
+function safeQ(s){return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
 
-/* ═══ HISTORY ═══ */
-const history=[];
+/* ═══════════════════════════════════════
+   Init
+   ═══════════════════════════════════════ */
+window.addEventListener('load',()=>{
+  refreshLang();
+  $('si').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch()});
+  $('ci').addEventListener('input',onCS);
+  $('yf').addEventListener('keydown',e=>{if(e.key==='Enter')applyYr()});
+  $('yt').addEventListener('keydown',e=>{if(e.key==='Enter')applyYr()});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){cM('am');cM('tm');closeDP();clearCS()}});
+  document.addEventListener('click',e=>{if(!$('cw').contains(e.target))$('cd').style.display='none'});
+  document.querySelectorAll('.mo').forEach(el=>{
+    el.addEventListener('click',e=>{if(e.target===el){el.classList.add('off');restoreWC()}});
+  });
+  let rt;
+  window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{if(S.co.length)render(S.au,S.co)},300)});
+  loadExample();
+});
 
-/* ═══ API ═══ */
-async function api(path){
-    const url=`${CFG.API}${path}${path.includes('?')?'&':'?'}${CFG.MAIL}`;
-    for(let i=0;i<CFG.RETRY;i++){
-        const r=await fetch(url);
-        if(r.status===429){await sleep(1000*(i+1));continue}
-        if(!r.ok)throw new Error('API '+r.status);
-        return r.json();
-    }
-    throw new Error('Rate limited');
+/* ═══════════════════════════════════════
+   API
+   ═══════════════════════════════════════ */
+async function searchAPI(q){
+  const r=await fetch(`https://api.openalex.org/authors?search=${encodeURIComponent(q)}&per_page=10`);
+  if(!r.ok) throw new Error('API');
+  const d=await r.json();
+  return(d.results||[]).map(a=>({
+    id:a.id,name:a.display_name,
+    wc:a.works_count||0,cc:a.cited_by_count||0,
+    inst:a.last_known_institutions?.[0]?.display_name||'',
+    ctr:a.last_known_institutions?.[0]?.country_code||''
+  }));
 }
 
-async function searchAuthors(q){return(await api(`/authors?search=${encodeURIComponent(q)}&per_page=10`)).results||[]}
-
-async function fetchAuthorProfile(id){
-    const sid=id.replace('https://openalex.org/','');
-    return api(`/authors/${sid}`);
+async function fetchW(aid){
+  const sid=aid.replace('https://openalex.org/','');
+  let ws=[],cur='*',pg=0;
+  while(cur&&pg<12){
+    const u=`https://api.openalex.org/works?filter=author.id:${sid}&per_page=200&cursor=${cur}&select=id,title,publication_year,authorships`;
+    const r=await fetch(u);if(!r.ok)break;
+    const d=await r.json();
+    if(!d.results?.length)break;
+    ws=ws.concat(d.results);
+    cur=d.meta?.next_cursor||null;
+    pg++;updLD(`${t('loadingPapers')} ${ws.length} ${t('papersLoaded')}`);
+  }
+  return ws;
 }
 
-async function fetchWorks(authorId,onProg){
-    const works=[];let cursor='*',total=null;
-    const sid=authorId.replace('https://openalex.org/','');
-    while(cursor&&works.length<CFG.MAX_WORKS){
-        const d=await api(`/works?filter=author.id:${sid}&per_page=${CFG.PP}&cursor=${encodeURIComponent(cursor)}&select=id,title,publication_year,authorships`);
-        if(!d.results?.length)break;
-        works.push(...d.results);
-        if(total===null)total=d.meta?.count||0;
-        cursor=d.meta?.next_cursor||null;
-        if(onProg)onProg(Math.min(works.length,CFG.MAX_WORKS),total);
-    }
-    return{works:works.slice(0,CFG.MAX_WORKS),total:total||works.length};
-}
-
-async function batchAuthors(ids){
-    const map=new Map();
-    for(let i=0;i<ids.length;i+=CFG.BATCH){
-        const batch=ids.slice(i,i+CFG.BATCH);
-        const sids=batch.map(id=>id.replace('https://openalex.org/','')).join('|');
-        try{const d=await api(`/authors?filter=ids.openalex:${sids}&per_page=${CFG.BATCH}`);if(d.results)for(const r of d.results)map.set(r.id,r)}catch(e){console.warn('batch err',e)}
-    }
-    return map;
-}
-
-/* ═══ DATA ═══ */
-function buildMap(works,authorId){
-    const map=new Map();
-    for(const w of works){
-        if(!w.authorships)continue;
-        for(const a of w.authorships){
-            if(!a.author?.id||a.author.id===authorId)continue;
-            const id=a.author.id;
-            let e=map.get(id);
-            if(!e){e={id,name:a.author.display_name||'Unknown',ccs:[],insts:[],count:0,works:[]};map.set(id,e)}
-            e.count++;
-            if(a.institutions?.length){
-                for(const inst of a.institutions){
-                    if(inst.country_code)e.ccs.push(inst.country_code);
-                    if(inst.display_name)e.insts.push(inst.display_name);
-                }
-            }
-            if(e.works.length<20)e.works.push({title:w.title||'Untitled',year:w.publication_year||''});
-        }
-    }
-    return map;
-}
-
-async function resolveRegions(collabs,onStatus){
-    const missing=collabs.filter(c=>!c.ccs.length);
-    if(missing.length){
-        if(onStatus)onStatus(`Resolving ${missing.length} unknown regions…`);
-        const profiles=await batchAuthors(missing.map(c=>c.id));
-        for(const c of missing){
-            const p=profiles.get(c.id);
-            if(p?.last_known_institutions?.length){
-                const inst=p.last_known_institutions[0];
-                if(inst.country_code)c.ccs.push(inst.country_code);
-                if(inst.display_name&&!c.insts.length)c.insts.push(inst.display_name);
-            }
-        }
-    }
-    for(const c of collabs){c.country=majority(c.ccs);c.inst=majority(c.insts);c.region=toRegion(c.country)}
-}
-
-function topCollabs(map){return[...map.values()].sort((a,b)=>b.count-a.count).slice(0,CFG.MAX_CO)}
-
-/* ═══ VISUALIZATION ═══ */
-let sim=null;
-
-function render(centerName,collabs){
-    if(sim)sim.stop();
-    const svg=d3.select('#svg');svg.selectAll('*').remove();
-    const W=svg.node().parentElement.clientWidth,H=svg.node().parentElement.clientHeight;
-    svg.attr('width',W).attr('height',H);
-
-    const mx=d3.max(collabs,d=>d.count)||1;
-    const rS=d3.scaleSqrt().domain([1,mx]).range([7,44]);
-    const lwS=d3.scaleLinear().domain([1,mx]).range([.4,5]).clamp(true);
-
-    const center={id:'__c__',name:centerName,isCenter:true,r:28,fx:W/2,fy:H/2};
-    const nodes=[center,...collabs.map(d=>({...d,r:rS(d.count)}))];
-    const links=collabs.map(d=>({source:'__c__',target:d.id,value:d.count}));
-
-    sim=d3.forceSimulation(nodes)
-        .force('link',d3.forceLink(links).id(d=>d.id).distance(d=>100+(1-d.value/mx)*140).strength(d=>.15+.4*(d.value/mx)))
-        .force('charge',d3.forceManyBody().strength(d=>d.isCenter?-800:-80))
-        .force('center',d3.forceCenter(W/2,H/2).strength(.03))
-        .force('collide',d3.forceCollide().radius(d=>d.r+5));
-
-    const g=svg.append('g');
-    svg.call(d3.zoom().scaleExtent([.1,10]).on('zoom',e=>g.attr('transform',e.transform)));
-
-    const linkEl=g.append('g').selectAll('line').data(links).join('line')
-        .attr('stroke','#3d4060').attr('stroke-width',d=>lwS(d.value)).attr('stroke-opacity',.45);
-
-    const glowEl=g.append('g').selectAll('circle').data(nodes).join('circle')
-        .attr('r',d=>d.r+4).attr('fill','none')
-        .attr('stroke',d=>d.isCenter?'#fff':COL[d.region]||COL.other)
-        .attr('stroke-opacity',.12).attr('stroke-width',6);
-
-    const nodeEl=g.append('g').selectAll('circle').data(nodes).join('circle')
-        .attr('r',d=>d.r)
-        .attr('fill',d=>d.isCenter?'#1a1d27':COL[d.region]||COL.other)
-        .attr('stroke',d=>d.isCenter?'#fff':'#1a1d27')
-        .attr('stroke-width',d=>d.isCenter?2.5:1.2)
-        .attr('cursor',d=>d.isCenter?'default':'pointer')
-        .call(d3.drag()
-            .on('start',(e,d)=>{if(!e.active)sim.alphaTarget(.3).restart();if(!d.isCenter){d.fx=d.x;d.fy=d.y}})
-            .on('drag',(e,d)=>{if(!d.isCenter){d.fx=e.x;d.fy=e.y}})
-            .on('end',(e,d)=>{if(!e.active)sim.alphaTarget(0);if(!d.isCenter){d.fx=null;d.fy=null}}));
-
-    const cntEl=g.append('g').selectAll('text').data(nodes.filter(d=>!d.isCenter)).join('text')
-        .attr('text-anchor','middle').attr('dy','.35em')
-        .attr('font-size',d=>Math.max(6,d.r*.5)+'px')
-        .attr('fill','#fff').attr('font-weight','700').attr('pointer-events','none')
-        .text(d=>d.count);
-
-    const icoEl=g.append('text').datum(center)
-        .attr('text-anchor','middle').attr('dy','.35em')
-        .attr('font-size','16px').attr('pointer-events','none').text('👤');
-
-    const lblEl=g.append('g').selectAll('text').data(nodes).join('text')
-        .attr('text-anchor','middle').attr('dy',d=>d.r+12)
-        .attr('font-size',d=>d.isCenter?'10px':'7px')
-        .attr('fill',d=>d.isCenter?'#ccc':'#666')
-        .attr('font-weight',d=>d.isCenter?'700':'400')
-        .attr('pointer-events','none')
-        .text(d=>{const n=d.name;const m=d.isCenter?30:22;return n.length>m?n.slice(0,m-1)+'…':n});
-
-    const tp=$('tp');
-    nodeEl.on('mouseover',(e,d)=>{
-        if(d.isCenter)return;tp.style.display='block';
-        tp.innerHTML=`<strong>${d.name}</strong>${d.country?' ('+d.country+')':''}<br>🌍 ${LBL[d.region]}<br>🏛 ${d.inst||'N/A'}<br>📄 ${d.count} co-authored paper${d.count>1?'s':''}`;
-        d3.select(e.target).attr('stroke','#fff').attr('stroke-width',3);
-    })
-    .on('mousemove',e=>{tp.style.left=(e.pageX+12)+'px';tp.style.top=(e.pageY-14)+'px'})
-    .on('mouseout',(e,d)=>{tp.style.display='none';d3.select(e.target).attr('stroke',d.isCenter?'#fff':'#1a1d27').attr('stroke-width',d.isCenter?2.5:1.2)})
-    .on('click',(e,d)=>{if(!d.isCenter)showPanel(d)});
-
-    sim.on('tick',()=>{
-        linkEl.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y).attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
-        glowEl.attr('cx',d=>d.x).attr('cy',d=>d.y);
-        nodeEl.attr('cx',d=>d.x).attr('cy',d=>d.y);
-        cntEl.attr('x',d=>d.x).attr('y',d=>d.y);
-        icoEl.attr('x',center.x).attr('y',center.y);
-        lblEl.attr('x',d=>d.x).attr('y',d=>d.y);
+/* ═══════════════════════════════════════
+   Build Collaboration Map
+   ═══════════════════════════════════════ */
+function buildMap(ws,aid,yf,yt){
+  const m=new Map();
+  ws.forEach(w=>{
+    const y=w.publication_year;if(!y||y<yf||y>yt)return;
+    const as=w.authorships||[];
+    if(!as.some(a=>a.author?.id===aid))return;
+    as.forEach(a=>{
+      if(!a.author?.id||a.author.id===aid)return;
+      const c=a.author.id;
+      if(!m.has(c))m.set(c,{
+        id:c,name:a.author.display_name||'Unknown',
+        inst:a.institutions?.[0]?.display_name||'',
+        ctr:a.institutions?.[0]?.country_code||'',
+        count:0,years:new Set(),papers:[]
+      });
+      const e=m.get(c);
+      e.count++;e.years.add(y);
+      e.papers.push({title:w.title,year:y});
     });
-    $('lg').style.display='block';
+  });
+  const arr=Array.from(m.values());
+  arr.forEach(c=>{c.years=[...c.years].sort()});
+  arr.sort((a,b)=>b.count-a.count);
+  return arr;
 }
 
-/* ═══ PANEL ═══ */
-function showPanel(d){
-    const pn=$('pn');pn.classList.add('on');
-    $('pName').textContent=d.name;
-    $('pMeta').textContent=`${d.inst||'Unknown institution'}${d.country?' · '+d.country:''} · ${d.count} co-authored papers`;
-    const rc=d.region==='asia'?'color:#f87171':d.region==='euam'?'color:#60a5fa':'color:#a78bfa';
-    $('pBadge').innerHTML=`<span class="bd" style="border:1px solid;${rc}">${LBL[d.region]}</span>`;
+/* ═══════════════════════════════════════
+   UI Helpers
+   ═══════════════════════════════════════ */
+function showLD(m){$('lo').classList.remove('off');$('lt').textContent=m||t('loading')}
+function updLD(m){$('lt').textContent=m}
+function hideLD(){$('lo').classList.add('off')}
+function cM(id){$(id).classList.add('off');restoreWC()}
+function showM(id){$(id).classList.remove('off')}
+function restoreWC(){if(!$('ib').classList.contains('on'))$('wc').classList.remove('off')}
 
-    /* 需求1: 异步拉取最新单位 */
-    const instBox=$('pInst');instBox.style.display='block';
-    $('pInstName').innerHTML='<span class="mini-spin"></span> Loading…';
-    $('pInstSub').textContent='';
-    fetchAuthorProfile(d.id).then(p=>{
-        if(p.last_known_institutions?.length){
-            const i=p.last_known_institutions[0];
-            $('pInstName').textContent=i.display_name||'—';
-            const parts=[];
-            if(i.country_code)parts.push(i.country_code);
-            if(i.type)parts.push(i.type);
-            if(p.works_count)parts.push(p.works_count.toLocaleString()+' total works');
-            if(p.cited_by_count)parts.push(p.cited_by_count.toLocaleString()+' cites');
-            $('pInstSub').textContent=parts.join(' · ');
-        }else{
-            $('pInstName').textContent=d.inst||'Unknown';
-            $('pInstSub').textContent='No institution data on OpenAlex';
-        }
-    }).catch(()=>{
-        $('pInstName').textContent=d.inst||'Unknown';
-        $('pInstSub').textContent='(fallback from co-authorship data)';
-    });
-
-    /* 需求2+3: 应用内重新搜索按钮 */
-    $('pActions').innerHTML='';
-    const btnExplore=document.createElement('span');
-    btnExplore.className='rbtn';
-    btnExplore.textContent='🔍 Explore this author\'s network';
-    btnExplore.onclick=()=>exploreById(d.id,d.name);
-    $('pActions').appendChild(btnExplore);
-
-    const btnSearch=document.createElement('span');
-    btnSearch.className='rbtn';
-    btnSearch.style.marginLeft='6px';
-    btnSearch.textContent='🔎 Search by name';
-    btnSearch.onclick=()=>{$('inp').value=d.name;doSearch()};
-    $('pActions').appendChild(btnSearch);
-
-    /* History */
-    if(history.length){
-        $('pHist').style.display='';
-        $('pHistList').innerHTML=history.map((h,i)=>`<div class="hist-item"><a data-idx="${i}">📌 ${h.name}</a></div>`).join('');
-        $('pHistList').querySelectorAll('a').forEach(a=>a.onclick=()=>{const h=history[+a.dataset.idx];exploreById(h.id,h.name)});
-    }else $('pHist').style.display='none';
-
-    /* Works list */
-    if(d.works?.length){
-        $('pWorks').innerHTML=d.works.map(w=>`<div class="crow"><span>${w.title.length>50?w.title.slice(0,49)+'…':w.title}</span><span class="yr">${w.year}</span></div>`).join('');
-        $('pSec').style.display='';
-    }else $('pSec').style.display='none';
+function closeDP(){
+  $('dp').classList.remove('open');S.sel=null;
+  d3.selectAll('.ng').classed('nf',false).classed('nh',false);
+  d3.selectAll('.gl').classed('lf',false);
 }
 
-/* ═══ CORE FLOW ═══ */
-async function exploreById(authorId,authorName){
-    closeModal();
-    $('btn').disabled=true;
-    $('pn').classList.remove('on');
-    $('hint').style.display='none';
-    try{
-        loader(true,'Fetching author profile…');status('⏳ Loading profile…');
-        const profile=await fetchAuthorProfile(authorId);
-        const author={id:profile.id,display_name:profile.display_name||authorName,works_count:profile.works_count,cited_by_count:profile.cited_by_count,last_known_institutions:profile.last_known_institutions};
-        await runPipeline(author);
-    }catch(e){status('❌ '+e.message);console.error(e)}
-    finally{$('btn').disabled=false;loader(false)}
+function closeAll(){
+  if(S.sim)S.sim.stop();
+  d3.select('#gs').selectAll('*').remove();
+  $('ib').classList.remove('on');
+  $('cw').classList.remove('on');
+  $('dp').classList.remove('open');
+  $('lg').classList.remove('on');
+  $('wc').classList.remove('off');
+  S.au=null;S.works=[];S.co=[];S.sel=null;
 }
 
-async function runPipeline(author){
-    /* Add to history (deduplicate) */
-    if(!history.find(h=>h.id===author.id))history.unshift({id:author.id,name:author.display_name});
-    if(history.length>10)history.length=10;
-
-    loader(true,'Fetching works (cursor)…');status('⏳ Fetching…');
-    const{works,total}=await fetchWorks(author.id,(n,t)=>{loader(true,`Fetching works: ${n}/${t}…`)});
-    if(!works.length){status('❌ No works found');loader(false);return}
-    const cov=total>0?Math.round(works.length/total*100):100;
-
-    loader(true,'Building collaboration map…');status('⏳ Analyzing…');
-    const map=buildMap(works,author.id);
-    const collabs=topCollabs(map);
-    if(!collabs.length){status('❌ No collaborators found');loader(false);return}
-
-    await resolveRegions(collabs,m=>{loader(true,m);status('⏳ '+m)});
-
-    status(`✅ ${author.display_name} · ${works.length}/${total} works (${cov}%) · ${collabs.length} collaborators`);
-    $('cov').textContent=`📊 ${works.length}/${total} works (${cov}%)`;
-    render(author.display_name,collabs);
-    loader(false);
-}
-
-/* ═══ UI ═══ */
-function status(m){$('st').textContent=m}
-function loader(on,m){$('ld').classList.toggle('on',on);if(m)$('lt').textContent=m}
-function closeModal(){$('mo').classList.remove('on')}
-
-function openModal(authors){
-    $('al').innerHTML='';
-    $('mt').textContent=authors.length>1?`${authors.length} authors found — select one:`:'Confirm this author:';
-    for(const a of authors){
-        const c=document.createElement('div');c.className='acard';
-        const inst=a.last_known_institutions?.[0]?.display_name||'Unknown';
-        const cc=a.last_known_institutions?.[0]?.country_code||'';
-        c.innerHTML=`<div class="n">${a.display_name}</div><div class="i">🏛 ${inst}${cc?' ('+cc+')':''}</div><div class="s">📝 ${(a.works_count||0).toLocaleString()} works · 📖 ${(a.cited_by_count||0).toLocaleString()} cites</div>`;
-        c.onclick=()=>pickFromModal(a);
-        $('al').appendChild(c);
-    }
-    $('mo').classList.add('on');
-}
-
-async function pickFromModal(author){
-    closeModal();
-    $('btn').disabled=true;
-    $('pn').classList.remove('on');
-    $('hint').style.display='none';
-    try{await runPipeline(author)}
-    catch(e){status('❌ '+e.message);console.error(e)}
-    finally{$('btn').disabled=false;loader(false)}
-}
-
+/* ═══════════════════════════════════════
+   Search Flow
+   ═══════════════════════════════════════ */
 async function doSearch(){
-    const q=$('inp').value.trim();if(!q)return;
-    $('btn').disabled=true;$('pn').classList.remove('on');$('hint').style.display='none';status('');
-    loader(true,'Searching…');
-    try{
-        const r=await searchAuthors(q);
-        if(!r.length){status('❌ No authors found');return}
-        status(`${r.length} result(s)`);openModal(r);
-    }catch(e){status('❌ '+e.message)}
-    finally{$('btn').disabled=false;loader(false)}
+  const q=$('si').value.trim();if(!q)return;
+  $('wc').classList.add('off');showLD(t('searchingAuthor'));
+  try{
+    const authors=await searchAPI(q);
+    hideLD();
+    if(!authors.length){$('wc').classList.remove('off');return}
+    renderAuthorList(authors);
+    showM('am');
+  }catch(e){hideLD();$('wc').classList.remove('off');console.error(e)}
 }
 
-/* ═══ EVENTS ═══ */
-$('btn').onclick=doSearch;
-$('inp').onkeydown=e=>{if(e.key==='Enter')doSearch()};
-$('mx').onclick=closeModal;
-$('mo').onclick=e=>{if(e.target===$('mo'))closeModal()};
-document.onkeydown=e=>{if(e.key==='Escape'){closeModal();$('pn').classList.remove('on')}};
-window.onresize=()=>{const el=$('svg').parentElement;d3.select('#svg').attr('width',el.clientWidth).attr('height',el.clientHeight)};
+function renderAuthorList(authors){
+  const list=$('al');list.innerHTML='';
+  $('amTitle').textContent=t('selectAuthor');
+  authors.forEach(a=>{
+    const d=document.createElement('div');d.className='ai';
+    d.innerHTML=`<div class="an">${esc(a.name)}</div>
+      <div class="am">${esc(a.inst)}${a.ctr?' · '+a.ctr:''} · ${a.wc} ${t('papers')} · ${t('cited')} ${a.cc.toLocaleString()}</div>`;
+    d.onclick=()=>pickAuthor(a);
+    list.appendChild(d);
+  });
+}
+
+async function pickAuthor(a){
+  cM('am');S.au=a;
+  $('wc').classList.add('off');showLD(`${t('loadingPapers')} ${a.name}…`);
+  try{
+    const ws=await fetchW(a.id);S.works=ws;
+    const yrs=ws.map(w=>w.publication_year).filter(Boolean);
+    S.yMin=yrs.length?Math.min(...yrs):2000;
+    S.yMax=yrs.length?Math.max(...yrs):2025;
+    S.sf=S.yMin;S.st=S.yMax;
+    hideLD();
+    $('mf').value=S.yMin;$('mt').value=S.yMax;
+    $('ti').innerHTML=`<strong>${esc(a.name)}</strong><br>${t('yearRange')}: ${S.yMin} — ${S.yMax} (${ws.length} ${t('totalPapers')})<br>${t('narrowRange')}`;
+    showM('tm');
+  }catch(e){hideLD();$('wc').classList.remove('off');console.error(e)}
+}
+
+function confirmTF(){
+  S.sf=parseInt($('mf').value)||S.yMin;
+  S.st=parseInt($('mt').value)||S.yMax;
+  if(S.sf>S.st){const x=S.sf;S.sf=S.st;S.st=x}
+  cM('tm');go();
+}
+
+function applyYr(){
+  S.sf=parseInt($('yf').value)||S.yMin;
+  S.st=parseInt($('yt').value)||S.yMax;
+  if(S.sf>S.st){const x=S.sf;S.sf=S.st;S.st=x}
+  go();
+}
+
+function go(){
+  S.co=buildMap(S.works,S.au.id,S.sf,S.st);
+  $('cn').textContent=S.au.name;
+  $('yf').value=S.sf;$('yt').value=S.st;
+  updateInfoBar();
+  $('ib').classList.add('on');
+  $('cw').classList.add('on');
+  $('wc').classList.add('off');
+  $('ci').value='';$('cd').style.display='none';
+  closeDP();
+  render(S.au,S.co);
+}
+
+/* ═══════════════════════════════════════
+   D3 Force Graph
+   ═══════════════════════════════════════ */
+function render(author,collabs){
+  const svg=d3.select('#gs');svg.selectAll('*').remove();
+  if(S.sim)S.sim.stop();
+  const gc=$('gc'),W=gc.clientWidth,H=gc.clientHeight;
+  svg.attr('viewBox',`0 0 ${W} ${H}`);
+
+  const top=collabs.slice(0,60);
+  updateLegend();
+  $('lg').classList.add('on');
+
+  const nodes=[
+    {id:author.id,name:author.name,isC:true,count:0},
+    ...top.map(c=>({id:c.id,name:c.name,isC:false,count:c.count,inst:c.inst,ctr:c.ctr}))
+  ];
+  const links=top.map(c=>({source:author.id,target:c.id,value:c.count}));
+  const mx=top.length?top[0].count:1;
+  const rS=d3.scaleSqrt().domain([1,mx]).range([5,20]);
+  const lS=d3.scaleLinear().domain([1,mx]).range([.8,5]);
+
+  const g=svg.append('g');
+  svg.call(d3.zoom().scaleExtent([.15,5]).on('zoom',e=>g.attr('transform',e.transform)));
+
+  const lnk=g.selectAll('.gl').data(links).enter().append('line')
+    .attr('class','gl').attr('stroke-width',d=>lS(d.value));
+
+  const nd=g.selectAll('.ng').data(nodes).enter().append('g')
+    .attr('class','ng').style('cursor',d=>d.isC?'default':'pointer')
+    .call(d3.drag()
+      .on('start',(e,d)=>{if(!e.active)S.sim.alphaTarget(.3).restart();d.fx=d.x;d.fy=d.y})
+      .on('drag',(e,d)=>{d.fx=e.x;d.fy=e.y})
+      .on('end',(e,d)=>{if(!e.active)S.sim.alphaTarget(0);d.fx=null;d.fy=null}));
+
+  nd.append('circle')
+    .attr('r',d=>d.isC?26:rS(d.count||1))
+    .attr('fill',d=>d.isC?'#1f2328':nodeColor(d.ctr))
+    .attr('stroke',d=>d.isC?'#fff':'rgba(255,255,255,.8)')
+    .attr('stroke-width',d=>d.isC?3:1.5)
+    .attr('opacity',d=>d.isC?1:.85);
+
+  nd.filter(d=>d.isC).append('text')
+    .attr('text-anchor','middle').attr('dy',4).attr('fill','#fff')
+    .attr('font-size','11px').attr('font-weight','600').attr('pointer-events','none')
+    .text(author.name.split(/\s+/).map(w=>w[0]).join('').slice(0,3).toUpperCase());
+
+  nd.append('text')
+    .attr('class',d=>d.isC?'ncl':'nl')
+    .attr('dy',d=>d.isC?42:rS(d.count||1)+13)
+    .text(d=>{if(d.isC)return d.name;return d.name.length>16?d.name.slice(0,14)+'…':d.name});
+
+  const tip=$('tp');
+  nd.filter(d=>!d.isC)
+    .on('mouseover',(_,d)=>{
+      tip.style.display='block';
+      tip.textContent=`${d.name}${d.inst?' · '+d.inst:''} — ${d.count} ${t('coauthored')}`;
+    })
+    .on('mousemove',e=>{
+      const r=gc.getBoundingClientRect();
+      tip.style.left=(e.clientX-r.left+14)+'px';
+      tip.style.top=(e.clientY-r.top-10)+'px';
+    })
+    .on('mouseout',()=>{tip.style.display='none'})
+    .on('click',(e,d)=>{e.stopPropagation();showDP(d)});
+
+  svg.on('click',()=>closeDP());
+
+  S.sim=d3.forceSimulation(nodes)
+    .force('link',d3.forceLink(links).id(d=>d.id).distance(d=>80+50/(d.value||1)))
+    .force('charge',d3.forceManyBody().strength(-180))
+    .force('center',d3.forceCenter(W/2,H/2))
+    .force('collision',d3.forceCollide().radius(d=>(d.isC?30:rS(d.count||1))+6))
+    .on('tick',()=>{
+      lnk.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y)
+          .attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
+      nd.attr('transform',d=>`translate(${d.x},${d.y})`);
+    });
+}
+
+/* ═══════════════════════════════════════
+   Detail Panel
+   ═══════════════════════════════════════ */
+function showDP(nd){
+  const c=S.co.find(x=>x.id===nd.id);if(!c)return;
+  S.sel=nd.id;
+  const gid=d=>typeof d==='object'?d.id:d;
+  d3.selectAll('.ng').classed('nf',d=>!d.isC&&d.id!==nd.id).classed('nh',d=>d.id===nd.id);
+  d3.selectAll('.gl').classed('lf',d=>gid(d.target)!==nd.id&&gid(d.source)!==nd.id);
+
+  $('dt').textContent=c.name;
+  const rn=regionName(getRegion(c.ctr));
+  let h='';
+  /* ── Explore button ── */
+  h+=`<button class="sa" onclick="exploreAuthor('${safeQ(c.name)}')">${t('exploreNetwork')}</button>`;
+  if(c.inst) h+=`<div class="df"><div class="dl">${t('institution')}</div><div class="dv">${esc(c.inst)}</div></div>`;
+  if(c.ctr) h+=`<div class="df"><div class="dl">${t('countryRegion')}</div><div class="dv">${c.ctr} · ${rn}</div></div>`;
+  h+=`<div class="df"><div class="dl">${t('coauthorCount')}</div><div class="dv">${c.count}</div></div>`;
+  h+=`<div class="df"><div class="dl">${t('yearSpan')}</div><div class="dv">${c.years[0]} — ${c.years[c.years.length-1]} (${c.years.length} ${t('yrs')})</div></div>`;
+  h+=`<div class="df"><div class="dl">${t('coauthoredPapers')}</div><ul class="pl">`;
+  c.papers.sort((a,b)=>(b.year||0)-(a.year||0)).slice(0,30).forEach(p=>{
+    h+=`<li><span class="yt">${p.year||'?'}</span>${esc(p.title||'Untitled')}</li>`;
+  });
+  if(c.papers.length>30) h+=`<li style="color:var(--text2)">… ${c.papers.length-30} ${t('more')}</li>`;
+  h+='</ul></div>';
+  $('db').innerHTML=h;
+  $('dp').classList.add('open');
+}
+
+/* ═══════════════════════════════════════
+   Explore Author (navigate from detail)
+   ═══════════════════════════════════════ */
+function exploreAuthor(name){
+  closeDP();
+  $('si').value=name;
+  doSearch();
+}
+
+/* ═══════════════════════════════════════
+   Collaborator Search
+   ═══════════════════════════════════════ */
+function onCS(){
+  const kw=$('ci').value.trim().toLowerCase();
+  const dd=$('cd');
+  if(!kw){
+    dd.style.display='none';
+    d3.selectAll('.ng').classed('nf',false).classed('nh',false);
+    d3.selectAll('.gl').classed('lf',false);
+    return;
+  }
+  const ms=S.co.filter(c=>
+    c.name.toLowerCase().includes(kw)||
+    c.inst?.toLowerCase().includes(kw)||
+    c.ctr?.toLowerCase().includes(kw)||
+    regionName(getRegion(c.ctr)).toLowerCase().includes(kw)
+  ).slice(0,12);
+
+  if(!ms.length){
+    dd.innerHTML=`<div style="padding:12px;color:var(--text2);font-size:13px">${t('noMatch')}</div>`;
+    dd.style.display='block';return;
+  }
+  dd.innerHTML='';
+  ms.forEach(m=>{
+    const d=document.createElement('div');d.className='di';
+    d.innerHTML=`<div class="dn">${esc(m.name)}</div><div class="dm">${esc(m.inst||t('unknown'))} · ${m.count} ${t('coauthored')}</div>`;
+    d.onclick=()=>{dd.style.display='none';$('ci').value=m.name;hlN(m.id);showDP({id:m.id})};
+    dd.appendChild(d);
+  });
+  dd.style.display='block';
+
+  const ids=new Set(ms.map(m=>m.id));
+  const gid=d=>typeof d==='object'?d.id:d;
+  d3.selectAll('.ng').classed('nf',d=>!d.isC&&!ids.has(d.id)).classed('nh',d=>ids.has(d.id));
+  d3.selectAll('.gl').classed('lf',d=>!ids.has(gid(d.target))&&!ids.has(gid(d.source)));
+}
+
+function hlN(nid){
+  const gid=d=>typeof d==='object'?d.id:d;
+  d3.selectAll('.ng').classed('nf',d=>!d.isC&&d.id!==nid).classed('nh',d=>d.id===nid);
+  d3.selectAll('.gl').classed('lf',d=>gid(d.target)!==nid&&gid(d.source)!==nid);
+}
+
+function clearCS(){
+  $('ci').value='';$('cd').style.display='none';
+  d3.selectAll('.ng').classed('nf',false).classed('nh',false);
+  d3.selectAll('.gl').classed('lf',false);
+}
+
+/* ═══════════════════════════════════════
+   Fixed Example: Jingyu He
+   ═══════════════════════════════════════ */
+async function loadExample(){
+  $('si').value='Jingyu He';
+  $('wc').classList.add('off');
+  showLD(t('loadingExample'));
+  try{
+    const authors=await searchAPI('jingyu he');
+    if(!authors.length){hideLD();$('wc').classList.remove('off');return}
+    /* pick the one closest to ~13 works / ~58 citations */
+    authors.sort((a,b)=>(Math.abs(a.wc-13)+Math.abs(a.cc-58))-(Math.abs(b.wc-13)+Math.abs(b.cc-58)));
+    const a=authors[0];
+    S.au=a;
+    updLD(`${t('loadingPapers')} ${a.name}…`);
+    const ws=await fetchW(a.id);S.works=ws;
+    const yrs=ws.map(w=>w.publication_year).filter(Boolean);
+    S.yMin=yrs.length?Math.min(...yrs):2000;
+    S.yMax=yrs.length?Math.max(...yrs):2025;
+    S.sf=S.yMin;S.st=S.yMax;
+    hideLD();go();
+  }catch(e){hideLD();$('wc').classList.remove('off');console.error(e)}
+}
 </script>
 </body>
 </html>
