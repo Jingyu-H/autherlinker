@@ -105,6 +105,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
 .gl{stroke:#d0d7de;stroke-opacity:.45}
 .nf{opacity:.1}.lf{opacity:.03}
 .nh circle{stroke:#cf222e!important;stroke-width:3px!important}
+.vt{display:flex;gap:2px;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:2px}
+.vtb{padding:3px 10px;font-size:12px;cursor:pointer;border:none;background:transparent;color:var(--text2);border-radius:4px;font-weight:500;display:flex;align-items:center;gap:4px}
+.vtb:hover{color:var(--text)}
+.vtb.act{background:var(--card);color:var(--text);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.kw{display:inline-block;padding:3px 9px;margin:2px;background:#ddf4ff;color:var(--accent);border-radius:12px;font-size:12px}
 @media(max-width:700px){
   #dp{width:100%}
   #hd input{width:130px}
@@ -128,6 +133,11 @@ body{font-family:var(--font);background:var(--bg);color:var(--text)}
   <div id="ib">
     <span id="ibCur">Current:</span>
     <span class="badge" id="cn"></span>
+    <div class="vt" id="vtabs">
+      <button class="vtb act" data-v="people" onclick="setView('people')">👥 <span id="lblP">People</span></button>
+      <button class="vtb" data-v="inst" onclick="setView('inst')">🏛 <span id="lblI">Institutions</span></button>
+      <button class="vtb" data-v="topics" onclick="setView('topics')">🎯 <span id="lblT">Topics</span></button>
+    </div>
     <div class="yg">📅
       <input type="number" id="yf" min="1900" max="2030">
       <span>—</span>
@@ -207,7 +217,11 @@ const TR={
     more:'more',yrs:'years',
     topCollab:'TOP COLLABORATORS',
     authorRole:'Position Stats',
-    keyOnly:'⭐ Key Authors Only',keyMode:'· key authors only'
+    keyOnly:'⭐ Key Authors Only',keyMode:'· key authors only',
+    vPeople:'People',vInst:'Institutions',vTopics:'Topics',
+    topFields:'Top Research Fields',topKeywords:'Top Keywords',
+    peopleFromInst:'Collaborators from this institution',
+    paperWith:'Co-authored papers',noTopicData:'No topic data available'
   },
   cn:{
     search:'搜索',example:'示例',current:'当前：',apply:'应用',
@@ -231,7 +245,11 @@ const TR={
     more:'更多',yrs:'年',
     topCollab:'核心合作者',
     authorRole:'位次统计',
-    keyOnly:'⭐ 仅关键作者',keyMode:'· 仅关键作者'
+    keyOnly:'⭐ 仅关键作者',keyMode:'· 仅关键作者',
+    vPeople:'合作者',vInst:'机构',vTopics:'研究方向',
+    topFields:'主要研究方向',topKeywords:'热门关键词',
+    peopleFromInst:'该机构合作者',
+    paperWith:'合作论文',noTopicData:'暂无领域数据'
   }
 };
 function t(k){return TR[lang]?.[k]||TR.en[k]||k}
@@ -251,6 +269,9 @@ function refreshLang(){
   $('ci').placeholder=t('collabPH');
   $('wcTitle').innerHTML='🔗 '+t('title');
   $('wcSub').innerHTML=t('subtitle');
+  $('lblP').textContent=t('vPeople');
+  $('lblI').textContent=t('vInst');
+  $('lblT').textContent=t('vTopics');
   if(S.co.length){updateInfoBar();updateLegend();renderTop3()}
   if(S.sel)showDP({id:S.sel});
 }
@@ -287,6 +308,7 @@ function updateInfoBar(){
 
 function renderTop3(){
   const box=$('tp3');
+  if(S.view!=='people'){box.classList.remove('on');return}
   const top=S.co.slice(0,3);
   if(!top.length){box.classList.remove('on');return}
   let h=`<h5>★ ${t('topCollab')}</h5>`;
@@ -296,7 +318,7 @@ function renderTop3(){
   box.innerHTML=h;box.classList.add('on');
 }
 
-const S={au:null,works:[],yMin:2e3,yMax:2025,sf:2e3,st:2025,co:[],sim:null,sel:null,instMap:new Map(),keyOnly:false};
+const S={au:null,works:[],yMin:2e3,yMax:2025,sf:2e3,st:2025,co:[],sim:null,sel:null,instMap:new Map(),keyOnly:false,view:'people',insts:[],topics:{subs:[],kws:[]}};
 const $=id=>document.getElementById(id);
 const esc=s=>{const d=document.createElement('div');d.textContent=s==null?'':s;return d.innerHTML};
 function safeQ(s){return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'")}
@@ -305,12 +327,13 @@ window.addEventListener('load',()=>{
   refreshLang();updateKeyBtn();
   $('si').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch()});
   $('ci').addEventListener('input',onCS);
+  $('ci').addEventListener('focus',onCS);
   $('yf').addEventListener('keydown',e=>{if(e.key==='Enter')applyYr()});
   $('yt').addEventListener('keydown',e=>{if(e.key==='Enter')applyYr()});
   document.addEventListener('keydown',e=>{if(e.key==='Escape'){cM('am');cM('tm');closeDP();clearCS()}});
   document.addEventListener('click',e=>{if(!$('cw').contains(e.target))$('cd').style.display='none'});
   document.querySelectorAll('.mo').forEach(el=>{el.addEventListener('click',e=>{if(e.target===el){el.classList.add('off');restoreWC()}})});
-  let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{if(S.co.length)render(S.au,S.co)},300)});
+  let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{if(S.co.length)dispatchView()},300)});
   loadExample();
 });
 
@@ -336,7 +359,7 @@ async function fetchW(aid){
   const sid=aid.replace('https://openalex.org/','');
   let ws=[],cur='*',pg=0;
   while(cur&&pg<12){
-    const u=`https://api.openalex.org/works?filter=author.id:${sid}&per_page=200&cursor=${cur}&select=id,title,publication_year,authorships`;
+    const u=`https://api.openalex.org/works?filter=author.id:${sid}&per_page=200&cursor=${cur}&select=id,title,publication_year,authorships,primary_topic,keywords`;
     const r=await fetch(u);if(!r.ok)break;
     const d=await r.json();if(!d.results?.length)break;
     ws=ws.concat(d.results);cur=d.meta?.next_cursor||null;pg++;
@@ -345,7 +368,6 @@ async function fetchW(aid){
   return ws;
 }
 
-// Position label: 1st / 2nd / 2nd-last / last; key = first 2 or last 2
 function posInfo(i,n){
   if(i===0)return{label:'1st',key:true};
   if(i===n-1&&n>1)return{label:'last',key:true};
@@ -362,11 +384,11 @@ function buildMap(ws,aid,yf,yt,keyOnly){
     const focusIdx=as.findIndex(x=>x.author?.id===aid);
     if(focusIdx<0)return;
     const focusPI=posInfo(focusIdx,n);
-    if(keyOnly&&!focusPI.key)return; // skip papers where focus is not in key positions
+    if(keyOnly&&!focusPI.key)return;
     as.forEach((a,i)=>{
       if(!a.author?.id||a.author.id===aid)return;
       const pi=posInfo(i,n);
-      if(keyOnly&&!pi.key)return; // only count co-authors in key positions
+      if(keyOnly&&!pi.key)return;
       const c=a.author.id;
       if(!m.has(c))m.set(c,{id:c,name:a.author.display_name||'Unknown',inst:a.institutions?.[0]?.display_name||'',ctr:a.institutions?.[0]?.country_code||'',count:0,years:new Set(),papers:[],c1:0,c2:0,cL2:0,cL:0});
       const e=m.get(c);
@@ -384,6 +406,74 @@ function buildMap(ws,aid,yf,yt,keyOnly){
   return arr;
 }
 
+function buildInstitutions(ws,aid,yf,yt){
+  const m=new Map();
+  ws.forEach(w=>{
+    const y=w.publication_year;if(!y||y<yf||y>yt)return;
+    const as=w.authorships||[];
+    if(!as.some(x=>x.author?.id===aid))return;
+    const seen=new Set();
+    as.forEach(a=>{
+      if(!a.author?.id||a.author.id===aid)return;
+      (a.institutions||[]).forEach(inst=>{
+        if(!inst.id||seen.has(inst.id))return;
+        seen.add(inst.id);
+        if(!m.has(inst.id))m.set(inst.id,{id:inst.id,name:inst.display_name,ctr:inst.country_code||'',count:0,years:new Set(),papers:[],authors:new Map()});
+        const e=m.get(inst.id);
+        e.count++;e.years.add(y);
+        e.papers.push({title:w.title,year:y});
+        const ai=e.authors.get(a.author.id)||{id:a.author.id,name:a.author.display_name||'?',count:0};
+        ai.count++;e.authors.set(a.author.id,ai);
+      });
+    });
+  });
+  const arr=[...m.values()].map(c=>({...c,years:[...c.years].sort((a,b)=>a-b),authors:[...c.authors.values()].sort((a,b)=>b.count-a.count)}));
+  arr.sort((a,b)=>b.count-a.count);
+  return arr;
+}
+
+function buildTopics(ws,aid,yf,yt){
+  const subM=new Map(),kwM=new Map();
+  ws.forEach(w=>{
+    const y=w.publication_year;if(!y||y<yf||y>yt)return;
+    if(!(w.authorships||[]).some(x=>x.author?.id===aid))return;
+    const tp=w.primary_topic,sf=tp?.subfield;
+    if(sf?.id){
+      if(!subM.has(sf.id))subM.set(sf.id,{id:sf.id,name:sf.display_name,count:0,years:[],topics:new Map()});
+      const e=subM.get(sf.id);e.count++;e.years.push(y);
+      if(tp?.id){
+        const te=e.topics.get(tp.id)||{id:tp.id,name:tp.display_name,count:0};
+        te.count++;e.topics.set(tp.id,te);
+      }
+    }
+    (w.keywords||[]).forEach(k=>{
+      if(!k.id)return;
+      const e=kwM.get(k.id)||{id:k.id,name:k.display_name,count:0,score:0};
+      e.count++;e.score+=k.score||0;kwM.set(k.id,e);
+    });
+  });
+  const subs=[...subM.values()].map(s=>{
+    s.years.sort((a,b)=>a-b);s.yMin=s.years[0];s.yMax=s.years[s.years.length-1];
+    s.topics=[...s.topics.values()].sort((a,b)=>b.count-a.count);
+    return s;
+  }).sort((a,b)=>b.count-a.count);
+  const kws=[...kwM.values()].sort((a,b)=>b.count-a.count||b.score-a.score);
+  return{subs,kws};
+}
+
+function setView(v){S.view=v;if(S.au&&S.works.length)dispatchView()}
+
+function dispatchView(){
+  document.querySelectorAll('.vtb').forEach(b=>b.classList.toggle('act',b.dataset.v===S.view));
+  $('btnKey').style.display=S.view==='people'?'':'none';
+  $('cw').classList.toggle('on',S.view==='people');
+  if(S.view!=='people'){$('ci').value='';$('cd').style.display='none'}
+  $('tp3').classList.remove('on');closeDP();
+  if(S.view==='people'){render(S.au,S.co);renderTop3()}
+  else if(S.view==='inst'){renderInst(S.au,S.insts)}
+  else if(S.view==='topics'){renderTopics(S.topics);$('lg').classList.remove('on')}
+}
+
 function showLD(m){$('lo').classList.remove('off');$('lt').textContent=m||t('loading')}
 function updLD(m){$('lt').textContent=m}
 function hideLD(){$('lo').classList.add('off')}
@@ -395,7 +485,9 @@ function closeAll(){
   if(S.sim)S.sim.stop();
   d3.select('#gs').selectAll('*').remove();
   $('ib').classList.remove('on');$('cw').classList.remove('on');$('dp').classList.remove('open');$('lg').classList.remove('on');$('tp3').classList.remove('on');$('wc').classList.remove('off');
-  S.au=null;S.works=[];S.co=[];S.sel=null;S.instMap=new Map();S.keyOnly=false;updateKeyBtn();
+  S.au=null;S.works=[];S.co=[];S.sel=null;S.instMap=new Map();S.keyOnly=false;S.view='people';S.insts=[];S.topics={subs:[],kws:[]};
+  document.querySelectorAll('.vtb').forEach(b=>b.classList.toggle('act',b.dataset.v==='people'));
+  updateKeyBtn();
 }
 
 async function doSearch(){
@@ -445,11 +537,13 @@ function applyYr(){
 
 function go(){
   S.co=buildMap(S.works,S.au.id,S.sf,S.st,S.keyOnly);
+  S.insts=buildInstitutions(S.works,S.au.id,S.sf,S.st);
+  S.topics=buildTopics(S.works,S.au.id,S.sf,S.st);
   S.instMap=buildInstMap(S.co.slice(0,60));
   $('cn').textContent=S.au.name;$('yf').value=S.sf;$('yt').value=S.st;
-  updateInfoBar();$('ib').classList.add('on');$('cw').classList.add('on');$('wc').classList.add('off');
-  $('ci').value='';$('cd').style.display='none';closeDP();
-  render(S.au,S.co);renderTop3();
+  updateInfoBar();$('ib').classList.add('on');$('wc').classList.add('off');
+  $('ci').value='';$('cd').style.display='none';
+  dispatchView();
 }
 
 function render(author,collabs){
@@ -485,6 +579,120 @@ function render(author,collabs){
     .force('center',d3.forceCenter(W/2,H/2))
     .force('collision',d3.forceCollide().radius(d=>(d.isC?32:rS(d.count||1))+12))
     .on('tick',()=>{lnk.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y).attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);nd.attr('transform',d=>`translate(${d.x},${d.y})`)});
+}
+
+function renderInst(author,insts){
+  const svg=d3.select('#gs');svg.selectAll('*').remove();
+  if(S.sim)S.sim.stop();
+  const gc=$('gc'),W=gc.clientWidth,H=gc.clientHeight;
+  svg.attr('viewBox',`0 0 ${W} ${H}`);
+  const top=insts.slice(0,40);
+  if(!top.length){svg.append('text').attr('x',W/2).attr('y',H/2).attr('text-anchor','middle').attr('fill','#656d76').text(t('noTopicData'));return}
+  const colorOf=i=>i<INST_PALETTE.length?INST_PALETTE[i]:OTHER_COLOR;
+  $('lgTitle').textContent=t('institution');
+  $('lbd').innerHTML=top.slice(0,8).map((c,i)=>{const s=c.name.length>26?c.name.slice(0,24)+'…':c.name;return `<div class="lr"><div class="ld" style="background:${colorOf(i)}"></div><span class="lt2" title="${esc(c.name)}">${esc(s)}</span></div>`}).join('');
+  $('lg').classList.add('on');
+  const nodes=[{id:author.id,name:author.name,isC:true,count:0},...top.map((c,i)=>({id:c.id,name:c.name,isC:false,count:c.count,color:colorOf(i)}))];
+  const links=top.map(c=>({source:author.id,target:c.id,value:c.count}));
+  const mx=top[0].count;
+  const rS=d3.scaleSqrt().domain([1,mx]).range([8,30]);
+  const lS=d3.scaleLinear().domain([1,mx]).range([.8,5]);
+  const g=svg.append('g');
+  svg.call(d3.zoom().scaleExtent([.15,5]).on('zoom',e=>g.attr('transform',e.transform)));
+  const lnk=g.selectAll('.gl').data(links).enter().append('line').attr('class','gl').attr('stroke-width',d=>lS(d.value));
+  const nd=g.selectAll('.ng').data(nodes).enter().append('g').attr('class','ng').style('cursor',d=>d.isC?'default':'pointer')
+    .call(d3.drag().on('start',(e,d)=>{if(!e.active)S.sim.alphaTarget(.3).restart();d.fx=d.x;d.fy=d.y}).on('drag',(e,d)=>{d.fx=e.x;d.fy=e.y}).on('end',(e,d)=>{if(!e.active)S.sim.alphaTarget(0);d.fx=null;d.fy=null}));
+  nd.append('circle').attr('r',d=>d.isC?26:rS(d.count||1)).attr('fill',d=>d.isC?'#1f2328':d.color).attr('stroke','rgba(255,255,255,.85)').attr('stroke-width',d=>d.isC?3:1.5).attr('opacity',d=>d.isC?1:.92);
+  nd.filter(d=>d.isC).append('text').attr('text-anchor','middle').attr('dy',4).attr('fill','#fff').attr('font-size','11px').attr('font-weight','600').attr('pointer-events','none').style('paint-order','').style('stroke','none').text(author.name.split(/\s+/).map(w=>w[0]).join('').slice(0,3).toUpperCase());
+  nd.append('text').attr('class',d=>d.isC?'ncl':'nl').attr('dy',d=>d.isC?42:rS(d.count||1)+13).text(d=>{if(d.isC)return d.name;return d.name.length>18?d.name.slice(0,16)+'…':d.name});
+  const tip=$('tp');
+  nd.filter(d=>!d.isC)
+    .on('mouseover',function(_,d){tip.style.display='block';tip.textContent=`${d.name} — ${d.count} ${t('paperWith')}`;d3.select(this).raise()})
+    .on('mousemove',e=>{const r=gc.getBoundingClientRect();tip.style.left=(e.clientX-r.left+14)+'px';tip.style.top=(e.clientY-r.top-10)+'px'})
+    .on('mouseout',()=>{tip.style.display='none'})
+    .on('click',(e,d)=>{e.stopPropagation();showInstDP(d)});
+  svg.on('click',()=>closeDP());
+  S.sim=d3.forceSimulation(nodes)
+    .force('link',d3.forceLink(links).id(d=>d.id).distance(d=>100+60/(d.value||1)))
+    .force('charge',d3.forceManyBody().strength(-260))
+    .force('center',d3.forceCenter(W/2,H/2))
+    .force('collision',d3.forceCollide().radius(d=>(d.isC?32:rS(d.count||1))+14))
+    .on('tick',()=>{lnk.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y).attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);nd.attr('transform',d=>`translate(${d.x},${d.y})`)});
+}
+
+function showInstDP(nd){
+  const c=S.insts.find(x=>x.id===nd.id);if(!c)return;
+  S.sel=nd.id;
+  const gid=d=>typeof d==='object'?d.id:d;
+  d3.selectAll('.ng').classed('nf',d=>!d.isC&&d.id!==nd.id).classed('nh',d=>d.id===nd.id);
+  d3.selectAll('.gl').classed('lf',d=>gid(d.target)!==nd.id&&gid(d.source)!==nd.id);
+  $('dt').textContent=c.name;
+  let h='';
+  if(c.ctr)h+=`<div class="df"><div class="dl">${t('countryRegion')}</div><div class="dv">${c.ctr}</div></div>`;
+  h+=`<div class="df"><div class="dl">${t('paperWith')}</div><div class="dv">${c.count}</div></div>`;
+  h+=`<div class="df"><div class="dl">${t('yearSpan')}</div><div class="dv">${c.years[0]} — ${c.years[c.years.length-1]} (${c.years.length} ${t('yrs')})</div></div>`;
+  h+=`<div class="df"><div class="dl">${t('peopleFromInst')}</div><ul class="pl">`;
+  c.authors.slice(0,15).forEach(a=>{h+=`<li><span class="yt">${a.count}×</span>${esc(a.name)}</li>`});
+  if(c.authors.length>15)h+=`<li style="color:var(--text2)">… ${c.authors.length-15} ${t('more')}</li>`;
+  h+='</ul></div>';
+  h+=`<div class="df"><div class="dl">${t('coauthoredPapers')}</div><ul class="pl">`;
+  c.papers.slice().sort((a,b)=>(b.year||0)-(a.year||0)).slice(0,15).forEach(p=>{h+=`<li><span class="yt">${p.year||'?'}</span>${esc(p.title||'Untitled')}</li>`});
+  if(c.papers.length>15)h+=`<li style="color:var(--text2)">… ${c.papers.length-15} ${t('more')}</li>`;
+  h+='</ul></div>';
+  $('db').innerHTML=h;$('dp').classList.add('open');
+}
+
+function renderTopics(data){
+  const svg=d3.select('#gs');svg.selectAll('*').remove();
+  if(S.sim)S.sim.stop();
+  const gc=$('gc'),W=gc.clientWidth,H=gc.clientHeight;
+  svg.attr('viewBox',`0 0 ${W} ${H}`);
+  const subs=data.subs.slice(0,8),kws=data.kws.slice(0,25);
+  if(!subs.length){svg.append('text').attr('x',W/2).attr('y',H/2).attr('text-anchor','middle').attr('fill','#656d76').attr('font-size','14px').text(t('noTopicData'));return}
+  const PAD=24,leftW=Math.min(W*0.6,W-260),rightX=leftW+PAD,rightW=W-rightX-PAD;
+  svg.append('text').attr('x',PAD).attr('y',22).attr('fill','#1f2328').attr('font-size','13px').attr('font-weight','600').text('🎯 '+t('topFields'));
+  svg.append('text').attr('x',rightX).attr('y',22).attr('fill','#1f2328').attr('font-size','13px').attr('font-weight','600').text('🔖 '+t('topKeywords'));
+  const allY=subs.flatMap(s=>s.years),yMin=Math.min(...allY),yMax=Math.max(...allY);
+  const labelW=170,timeX0=PAD+labelW,timeX1=leftW-PAD;
+  const xScale=d3.scaleLinear().domain([yMin-0.3,yMax+0.3]).range([timeX0,timeX1]);
+  const topY=46,availH=H-topY-50,rowH=Math.min(54,availH/subs.length);
+  const subG=svg.selectAll('.sub').data(subs).enter().append('g').attr('transform',(d,i)=>`translate(0,${topY+i*rowH})`);
+  subG.append('text').attr('x',PAD).attr('y',rowH/2-2).attr('fill','#1f2328').attr('font-size','12px').attr('font-weight','600').text(d=>{const n=d.name;return n.length>22?n.slice(0,20)+'…':n});
+  subG.append('text').attr('x',PAD).attr('y',rowH/2+13).attr('fill','#656d76').attr('font-size','10px').text(d=>`${d.count} ${t('papers')} · ${d.yMin}–${d.yMax}`);
+  subG.append('line').attr('x1',timeX0).attr('x2',timeX1).attr('y1',rowH/2).attr('y2',rowH/2).attr('stroke','#e1e4e8').attr('stroke-width',1);
+  subG.append('rect').attr('x',d=>xScale(d.yMin)-3).attr('y',rowH/2-5).attr('width',d=>Math.max(6,xScale(d.yMax)-xScale(d.yMin)+6)).attr('height',10).attr('fill',(d,i)=>INST_PALETTE[i%INST_PALETTE.length]).attr('opacity',.22).attr('rx',5);
+  subG.each(function(d,i){
+    const col=INST_PALETTE[i%INST_PALETTE.length];
+    const cnt=new Map();d.years.forEach(y=>cnt.set(y,(cnt.get(y)||0)+1));
+    const mx=Math.max(...cnt.values());
+    d3.select(this).selectAll('.yd').data([...cnt.entries()]).enter().append('circle').attr('cx',e=>xScale(e[0])).attr('cy',rowH/2).attr('r',e=>3+Math.sqrt(e[1]/mx)*5).attr('fill',col).attr('opacity',.9).append('title').text(e=>`${e[0]}: ${e[1]} ${t('papers')}`);
+  });
+  const tip=$('tp');
+  subG.style('cursor','default')
+    .on('mouseover',function(_,d){tip.style.display='block';tip.innerHTML=`<b>${esc(d.name)}</b><br>${d.count} ${t('papers')} · ${d.yMin}–${d.yMax}<br><span style="color:#bbb">${d.topics.slice(0,3).map(x=>esc(x.name)).join(' · ')}</span>`})
+    .on('mousemove',e=>{const r=gc.getBoundingClientRect();tip.style.left=(e.clientX-r.left+14)+'px';tip.style.top=(e.clientY-r.top-10)+'px'})
+    .on('mouseout',()=>{tip.style.display='none'});
+  const axisY=topY+subs.length*rowH+10;
+  const yStep=Math.max(1,Math.ceil((yMax-yMin)/7)),yTicks=[];
+  for(let y=yMin;y<=yMax;y+=yStep)yTicks.push(y);
+  if(yTicks[yTicks.length-1]!==yMax)yTicks.push(yMax);
+  const axisG=svg.append('g').attr('transform',`translate(0,${axisY})`);
+  axisG.append('line').attr('x1',timeX0).attr('x2',timeX1).attr('stroke','#d0d7de');
+  axisG.selectAll('.ya').data(yTicks).enter().append('g').attr('transform',y=>`translate(${xScale(y)},0)`).each(function(y){const g=d3.select(this);g.append('line').attr('y2',4).attr('stroke','#d0d7de');g.append('text').attr('y',15).attr('text-anchor','middle').attr('fill','#656d76').attr('font-size','10px').text(y)});
+  if(!kws.length)return;
+  const kwG=svg.append('g').attr('transform',`translate(${rightX},${topY})`);
+  const kMax=kws[0].count,kMin=kws[kws.length-1].count;
+  const fontS=d3.scaleSqrt().domain([kMin,Math.max(kMax,kMin+1)]).range([11,21]);
+  let x=0,y=0;const rH=30;
+  kws.forEach(k=>{
+    const fs=fontS(k.count),w=k.name.length*fs*0.62+18;
+    if(x+w>rightW){x=0;y+=rH}
+    const g=kwG.append('g').attr('transform',`translate(${x},${y})`);
+    g.append('rect').attr('width',w-6).attr('height',fs+12).attr('rx',(fs+12)/2).attr('fill','#ddf4ff').attr('stroke','#b6e3ff');
+    g.append('text').attr('x',(w-6)/2).attr('y',fs+4).attr('text-anchor','middle').attr('fill','#0969da').attr('font-size',fs+'px').attr('font-weight',500).text(k.name);
+    g.append('title').text(`${k.name}: ${k.count} ${t('papers')}`);
+    x+=w;
+  });
 }
 
 function posBadge(label){
@@ -542,6 +750,7 @@ async function exploreAuthor(oid,name){
 }
 
 function onCS(){
+  if(S.view!=='people')return;
   const kw=$('ci').value.trim().toLowerCase();const dd=$('cd');
   if(!kw){dd.style.display='none';d3.selectAll('.ng').classed('nf',false).classed('nh',false);d3.selectAll('.gl').classed('lf',false);return}
   const ms=S.co.filter(c=>c.name.toLowerCase().includes(kw)||(c.inst||'').toLowerCase().includes(kw)||(c.ctr||'').toLowerCase().includes(kw)).slice(0,12);
