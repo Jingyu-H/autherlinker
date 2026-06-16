@@ -765,13 +765,16 @@ function onCS(){
 function hlN(nid){const gid=d=>typeof d==='object'?d.id:d;d3.selectAll('.ng').classed('nf',d=>!d.isC&&d.id!==nid).classed('nh',d=>d.id===nid);d3.selectAll('.gl').classed('lf',d=>gid(d.target)!==nid&&gid(d.source)!==nid)}
 function clearCS(){$('ci').value='';$('cd').style.display='none';d3.selectAll('.ng').classed('nf',false).classed('nh',false);d3.selectAll('.gl').classed('lf',false)}
 
+/* ===== 修改的核心：loadExample 直接使用 OpenAlex ID，不再搜索+猜测 ===== */
 async function loadExample(){
-  $('si').value='Jingyu He';$('wc').classList.add('off');showLD(t('loadingExample'));
+  const EXAMPLE_ID='https://openalex.org/A5038130500';
+  $('si').value='Jingyu He';
+  $('wc').classList.add('off');
+  showLD(t('loadingExample'));
   try{
-    const authors=await searchAPI('jingyu he');
-    if(!authors.length){hideLD();$('wc').classList.remove('off');return}
-    authors.sort((a,b)=>(Math.abs(a.wc-13)+Math.abs(a.cc-58))-(Math.abs(b.wc-13)+Math.abs(b.cc-58)));
-    const a=authors[0];S.au=a;
+    const a=await fetchAuthorByID(EXAMPLE_ID);
+    S.au=a;
+    $('si').value=a.name;
     updLD(`${t('loadingPapers')} ${a.name}…`);
     const ws=await fetchW(a.id);S.works=ws;
     const yrs=ws.map(w=>w.publication_year).filter(Boolean);
